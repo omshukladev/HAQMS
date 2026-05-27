@@ -2,7 +2,7 @@
 
 ## Total Problems
 
-12
+14
 
 ## Summary
 
@@ -20,6 +20,8 @@
 | 10 | Queue page leaks polling intervals | `frontend/src/app/queue/page.js` | Easy |
 | 11 | Doctor dashboard crashes on null medical history | `frontend/src/app/dashboard/page.js` | Easy |
 | 12 | Missing patient history detail route | `frontend/src/app/patients/[id]/history-records/page.js` | Medium |
+| 13 | Link component used without import in Dashboard | `frontend/src/app/dashboard/page.js` | Easy |
+| 14 | Registration endpoint returns password hash in response | `backend/src/routes/auth.js` | Easy |
 
 ## Notes
 

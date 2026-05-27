@@ -16,6 +16,7 @@ Update this file after major development sessions.
 - Identified the main audit hotspots across security, concurrency, performance, database design, and frontend stability.
 - Updated `missing-thing.md` and `todo.md` with the discovered issues and execution order.
 - Added a clean Markdown problems table in `docs/table.md` with total count, file locations, and easy/medium/hard ratings.
+- Synced `docs/table.md` with the current issue backlog count after additional findings were documented.
 
 ### Decisions
 
@@ -109,6 +110,42 @@ Update this file after major development sessions.
 - **Fixed global error handler** — Removed `err.message` and `err.stack` from API error responses. Errors are logged server-side and a generic message is returned to the client.
 - **Fixed unhandled rejection handler** — Added `process.exit(1)` after logging so the process manager can restart the server cleanly instead of running in an unstable state.
 - **Removed duplicate cors require** — Cleaned up duplicate `const cors = require("cors")` on line 20 that would cause a SyntaxError on startup.
+
+### Problems Encountered
+
+- Vitest 4 has dropped CJS `require("vitest")` support, requiring ESM `import` syntax in test files even though the backend uses CommonJS.
+
+### Next Steps
+
+- Continue with Phase 1 security fixes (auth routes, SQL injection, admin auth bypass)
+- Document approach in approach.md
+
+---
+
+## 2026-05-27 — Test Infrastructure Setup
+
+### Completed
+
+- Installed Vitest 4 and Supertest as dev dependencies in the backend
+- Created `backend/vitest.config.js` with V8 coverage provider and globals enabled
+- Created `backend/tests/app.test.js` with a self-contained test app builder (does not modify source files)
+- Added `test` and `test:watch` scripts to both `backend/package.json` and root `package.json`
+
+### Tests Created (6 passing)
+
+- **CORS Configuration** (3 tests) — Verified configured origin is allowed, unconfigured origins are blocked, and preflight OPTIONS returns correct headers for all 4 methods
+- **Global Error Handler** (2 tests) — Verified 500 returns generic message and does not leak `error`, `stack`, `details`, or `sqlMessage` fields
+- **Health Check** (1 test) — Verified GET / returns 200
+
+### Folder Structure
+
+```
+backend/
+├── tests/
+│   └── app.test.js
+├── vitest.config.js
+└── package.json (updated scripts)
+```
 
 ### Files Changed
 
