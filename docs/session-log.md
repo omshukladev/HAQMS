@@ -98,3 +98,23 @@ Update this file after major development sessions.
 
 - Begin implementing fixes starting with Phase 1 (Critical security issues)
 - Record approach in approach.md as each fix is implemented
+
+---
+
+## 2026-05-27 — Phase 1: index.js Security Fixes
+
+### Completed
+
+- **Fixed CORS misconfiguration** — Restricted from wildcard (`*`) to configurable origin via `process.env.CORS_ORIGIN` (defaults to localhost:3000). Whitelisted specific HTTP methods.
+- **Fixed global error handler** — Removed `err.message` and `err.stack` from API error responses. Errors are logged server-side and a generic message is returned to the client.
+- **Fixed unhandled rejection handler** — Added `process.exit(1)` after logging so the process manager can restart the server cleanly instead of running in an unstable state.
+- **Removed duplicate cors require** — Cleaned up duplicate `const cors = require("cors")` on line 20 that would cause a SyntaxError on startup.
+
+### Files Changed
+
+- `backend/src/index.js` — All three fixes + duplicate removal
+
+### Next Steps
+
+- Continue with Phase 1 security fixes (auth routes, SQL injection, admin auth bypass)
+- Document approach in approach.md
