@@ -323,3 +323,34 @@ if (password.length < 6) { ... }
 ### Files Changed
 
 - `.github/workflows/ci.yml` — Full CI pipeline with database service
+
+---
+
+## 2026-05-28 — CI Pipeline Fix: Install Backend Dependencies & Prisma Version
+
+### Completed
+
+- Fixed CI pipeline `.github/workflows/ci.yml` to use `npm run install:all` instead of `npm install`
+- The root `npm install` only installs root `devDependencies` (concurrently), leaving `backend/node_modules` empty
+- `npx prisma` then falls back to downloading the latest Prisma 7, which has breaking changes incompatible with the project's Prisma 5 schema
+- `npm run install:all` runs `npm install --prefix backend && npm install --prefix frontend`, installing local Prisma 5 in `backend/node_modules`
+
+### Problem
+
+```
+npx prisma generate
+npm warn exec The following package was not found and will be installed: prisma@7.8.0
+Error: The datasource property `url` is no longer supported in schema files.
+```
+
+### Root Cause
+
+Root `package.json` has `install:all` script for multi-package install, but CI used plain `npm install` which only touches root.
+
+### Resolution
+
+Changed `run: npm install` to `run: npm run install:all` in the CI install step.
+
+### Files Changed
+
+- `.github/workflows/ci.yml` — Single-line fix: `npm install` → `npm run install:all`

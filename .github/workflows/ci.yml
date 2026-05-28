@@ -36,8 +36,8 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install all dependencies (root, backend, frontend)
+        run: npm run install:all
 
       - name: Generate Prisma client
         run: npx prisma generate
