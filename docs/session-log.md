@@ -7,6 +7,75 @@ Update this file after major development sessions.
 
 ---
 
+## 2026-05-28 — Frontend Quick Wins: LEAK-1, CRASH-1, DOM-2
+
+### Completed
+
+- **Fixed LEAK-1 (Queue polling memory leak)** — Added `return () => clearInterval(intervalId)` in the queue page's `useEffect`. The interval now stops when the component unmounts, preventing multiple parallel polling intervals.
+- **Fixed CRASH-1 (Null medicalHistory crash)** — Changed `selectedPatientHistory.medicalHistory.toUpperCase()` to use optional chaining with a fallback: `?.toUpperCase() || 'No history recorded'`. Seed patients (Bruce Wayne, Clark Kent, Diana Prince) no longer crash the doctor workflow.
+- **Fixed DOM-2 (Undefined doctor check-in)** — Added `disabled={doctorsList.length === 0}` to the quick check-in button. Prevents sending `undefined` as `doctorId` when doctors haven't loaded yet.
+
+### Files Changed
+
+- `frontend/src/app/queue/page.js` — Added interval cleanup return
+- `frontend/src/app/dashboard/page.js` — Optional chaining on medicalHistory, disabled state on check-in button
+- `docs/frontend-errors.md` — CRASH-1, LEAK-1, DOM-2 marked Fixed
+- `docs/frontend-approach.md` — Added FIX 9, 10, 11 with before/after/test steps
+- `docs/todo.md` — Progress updated
+
+### Status
+
+- ✅ All 3 critical crashes fixed (CRASH-1, CRASH-2, CRASH-3)
+- ✅ Memory leak fixed (LEAK-1)
+- ✅ Logout crash fixed
+- ⏳ Remaining frontend: FEAT-1 (missing history page), PERF-1 (debounce), UX-4 (error boundary), PERF-2 (AbortController), DOM-1 (getElementById), others
+
+---
+
+## 2026-05-28 — Fix Hydration Mismatch from Null Guard
+
+### Completed
+
+- **Fixed hydration error on dashboard** — The `if (!user) return null;` guard caused a mismatch: server rendered null (user is always null server-side), client rendered full dashboard (user from localStorage). Fixed by using the standard Next.js `mounted` pattern:
+  - Added `const [mounted, setMounted] = useState(false)` + `useEffect(() => setMounted(true), [])`
+  - Server and client both render a loading skeleton before hydration (matches)
+  - After hydration, dashboard renders normally
+
+### Files Changed
+
+- `frontend/src/app/dashboard/page.js` — Added mounted state + effect, replaced null guard with mounted+loading pattern
+
+### Status
+
+- ✅ Hydration error fixed
+- ✅ Dashboard loads cleanly with no React warnings
+
+## 2026-05-28 — Frontend Audit Follow-up
+
+### Completed
+
+- Read the new frontend documentation set: `frontend-plan.md`, `frontend-errors.md`, `frontend-approach.md`, and `qna.md`.
+- Verified the current frontend code for the dashboard, auth context, queue page, login page, and missing patient routes.
+- Confirmed the following frontend fixes are already present in code: API base URL env var, `fetchWithAuth`, auto-logout on 401, missing `Link` import, and null-user logout guard.
+- Confirmed the remaining high-priority frontend gaps are still open: queue polling cleanup, nullable medical history rendering, missing patient history route, DOM `getElementById` usage, and doctor check-in guards.
+
+### Decisions
+
+- Keep the next work order aligned with the docs: fix the queue memory leak first, then the null medical history crash, then the missing history route.
+- Update docs using the repo's actual file names (`session-log.md`, `todo.md`) rather than the singular names mentioned earlier.
+
+### Problems Encountered
+
+- The repo does not contain `session.log` or `todos.md`; the tracked files are `session-log.md` and `todo.md`.
+
+### Next Steps
+
+- Patch the queue polling cleanup.
+- Patch nullable medical history rendering in the dashboard.
+- Build the missing patient history route and then cover the remaining frontend stability issues.
+
+---
+
 ## 2026-05-27
 
 ### Completed

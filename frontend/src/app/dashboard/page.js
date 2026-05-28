@@ -14,7 +14,12 @@ export default function Dashboard() {
   const { user, token, API_BASE_URL, fetchWithAuth, logout } = useAuth();
 
   // Global State
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState(user?.role === 'ADMIN' ? 'reports' : user?.role === 'RECEPTIONIST' ? 'patients' : 'appointments');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ==========================================
   // STATE FOR RECEPTIONIST WORKFLOWS
@@ -334,6 +339,18 @@ export default function Dashboard() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8">
+        <div className="pulse-loader">
+          <div></div>
+          <div></div>
+        </div>
+        <p className="mt-4 text-sm font-semibold text-slate-400">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   if (!user) return null;
 
   return (
@@ -474,8 +491,9 @@ export default function Dashboard() {
                               </td>
                               <td className="py-3.5 text-right space-x-2">
                                 <button
+                                  disabled={doctorsList.length === 0}
                                   onClick={() => handleQueueCheckin(p.id, doctorsList[0]?.id)}
-                                  className="text-xxs px-2.5 py-1 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold hover:bg-teal-500 hover:text-white transition-colors"
+                                  className="text-xxs px-2.5 py-1 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold hover:bg-teal-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   Check In
                                 </button>
@@ -861,12 +879,9 @@ export default function Dashboard() {
                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
                   <h4 className="font-bold text-slate-400 uppercase tracking-wider">Clinical Background Information</h4>
                   
-                  {/* FRONTEND CRASH BUG:
-                      Assuming medicalHistory is always populated. Accesses a method on a nullable property
-                      without optional chaining! If medicalHistory is null (which is the case for Batman, Clark Kent, etc.),
-                      this code throws: "Cannot read properties of null (reading 'toUpperCase')" and crashes the app! */}
+                  {/* BUG FIX: Use optional chaining to handle null medicalHistory */}
                   <p className="text-slate-700 dark:text-slate-300 leading-5 text-sm font-semibold">
-                    {selectedPatientHistory.medicalHistory.toUpperCase()}
+                    {selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history recorded'}
                   </p>
                 </div>
 

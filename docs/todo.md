@@ -15,9 +15,9 @@
 
 - [x] Add missing `Link` import in Dashboard component
 - [x] Fix null user crash on logout (optional chaining + null guard)
-- [ ] Guard nullable medical history rendering
+- [x] Guard nullable medical history rendering
 - [ ] Guard doctor check-in against undefined matchedDoc
-- [ ] Fix queue polling interval cleanup
+- [x] Fix queue polling interval cleanup
 - [ ] Fix stale closure on refreshCount
 
 ## Phase 3 — Data Integrity and Concurrency
@@ -49,11 +49,12 @@
 - [x] Add auto-logout on 401 responses (fetchWithAuth wrapper)
 - [x] Fix ESLint React 19 warnings (state initializers, comment placement)
 - [x] Create .env file with NEXT_PUBLIC_API_URL
+- [x] Guard doctor check-in against undefined matchedDoc
+- [ ] Implement the missing patient history route
 - [ ] Add AbortController to fetch calls in dashboard
 - [ ] Convert DOM getElementById refs to React state
 - [ ] Add loading/disabled state to submit buttons
 - [ ] Improve dashboard search and fetch behavior
-- [ ] Implement the missing patient history route
 
 ## Phase 7 — Input Validation
 

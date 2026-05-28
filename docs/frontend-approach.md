@@ -284,6 +284,9 @@ if (data.status === 'success') { setPatients(data.data.patients); }
 | — | `dashboard/page.js` | 12 fetch calls with old API format | All read standardized `data.data.*` envelope | Fixed |
 | — | `queue/page.js` | 1 fetch call with old API format | Reads standardized `data.data.tokens` | Fixed |
 | CRASH-3 | `dashboard/page.js:17` | Null user crash on logout — `user.role` when user is null | Optional chaining `user?.role` + null guard | Fixed |
+| CRASH-1 | `dashboard/page.js:869` | Null medicalHistory crash — `.toUpperCase()` on null | Optional chaining `?.toUpperCase() \|\| 'No history recorded'` | Fixed |
+| LEAK-1 | `queue/page.js:49` | Queue polling interval has no cleanup — memory leak on each navigation | `return () => clearInterval(intervalId)` | Fixed |
+| DOM-2 | `dashboard/page.js:477` | Check-in button uses `doctorsList[0]?.id` before doctors load | `disabled={doctorsList.length === 0}` on button | Fixed |
 
 ---
 
@@ -328,7 +331,143 @@ if (!user) return null;
 
 ---
 
-**Next fixes planned:** Error boundary (UX-4), Null medicalHistory crash (CRASH-1), Memory leak fix (LEAK-1), Debounce patient search (PERF-1).
+---
+
+## FIX 9: Null medicalHistory Crash (CRASH-1)
+
+**File:** `frontend/src/app/dashboard/page.js:869`
+
+### Before
+
+```js
+{selectedPatientHistory.medicalHistory.toUpperCase()}
+```
+
+> **Issue:** Seed patients (Bruce Wayne, Clark Kent, Diana Prince) have no medical history. When a doctor clicks their name, `medicalHistory` is `null`, and `.toUpperCase()` throws `Cannot read properties of null (reading 'toUpperCase')`.
+
+### After
+
+```js
+{selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history recorded'}
+```
+
+> **Why This Fix:** Optional chaining (`?.`) returns `undefined` instead of crashing when `medicalHistory` is null. The fallback provides a clean user-facing message.
+
+### How to Test
+
+1. Log in as Doctor (e.g., doctor@haqms.com)
+2. Go to Appointments tab
+3. Click a patient name with no medical history (e.g., any of the seed patients)
+4. The modal opens cleanly — no crash, shows "No history recorded"
+
+---
+
+## FIX 10: Queue Polling Memory Leak (LEAK-1)
+
+**File:** `frontend/src/app/queue/page.js:49-58`
+
+### Before
+
+```js
+const intervalId = setInterval(() => {
+  fetchQueueData();
+  setRefreshCount((prev) => prev + 1);
+}, 3000);
+// No cleanup — interval lives forever
+```
+
+> **Issue:** Every navigation to `/queue` spawns a new interval with no cleanup. After 10 navigations, 10 intervals poll the server simultaneously, wasting bandwidth and causing React warnings on unmounted components.
+
+### After
+
+```js
+const intervalId = setInterval(() => {
+  fetchQueueData();
+  setRefreshCount((prev) => prev + 1);
+}, 3000);
+
+return () => clearInterval(intervalId);
+```
+
+> **Why This Fix:** React calls the cleanup function when the component unmounts, stopping the interval. Only one interval ever exists at a time.
+
+### How to Test
+
+1. Navigate to `/queue`
+2. Open browser DevTools → Console, observe polls firing every 3 seconds
+3. Navigate to Dashboard, then back to Queue
+4. Only one interval should be running (check browser memory/performance tools)
+
+---
+
+## FIX 11: Undefined Doctor Check-In Guard (DOM-2)
+
+**File:** `frontend/src/app/dashboard/page.js:477`
+
+### Before
+
+```js
+<button onClick={() => handleQueueCheckin(p.id, doctorsList[0]?.id)}>
+```
+
+> **Issue:** If `doctorsList` hasn't loaded yet, `doctorsList[0]` is `undefined`. The check-in call sends `undefined` as `doctorId`, causing a silent backend error.
+
+### After
+
+```js
+<button
+  disabled={doctorsList.length === 0}
+  onClick={() => handleQueueCheckin(p.id, doctorsList[0]?.id)}
+>
+```
+
+> **Why This Fix:** The button is disabled until doctors are loaded, preventing the user from attempting a doomed check-in. Visual feedback (`disabled:opacity-50`) makes the state obvious.
+
+### How to Test
+
+1. Log in as Receptionist
+2. Quickly load the Patients tab before the doctors dropdown finishes loading
+3. "Check In" buttons should be visually disabled (grayed out)
+4. After doctors load, buttons become clickable
+
+---
+
+**Next fixes planned:** Debounce patient search (PERF-1), Error boundary (UX-4), AbortController on fetches (PERF-2).
 
 
 ---
+
+
+ok its working now can you tell me whats left
+  what i can see in i login in using admin the 1st tab i see system audt report with a button when i click it it work fine with no latency error like we previsously getting
+  2nd tab i see is physican registry i see this red thing in ui SQL Vulnerability alert: This search executes raw interpolation:
+  SELECT * FROM "Doctor" WHERE name ILIKE '%{query}%'
+  Can be audited by inputting standard SQL injection strings to leak full user login lists.
+  is this ui / backend issue fix if ye how to test there is one search bar when i search name it work Dr. Gregory House
+  with this
+  [Pasted text #1 +3 lines]
+  3rd tab is Patient registry  Directory
+  it has 1 table Patient Lookup Directory
+  and one form New Registration in registration phone no is writen uncheckformat check this tooo the phone format we use is this 555-0101
+  [Pasted text #2 +6 lines]
+  i added my name and email and it worked my name show in table in table we have 2 button for each one for check in and one delete i press check it this ui pop up Error check-in:
+  Internal Server Error
+  then i press on delete alert pop up and said sucess
+  [Pasted text #3 +11 lines]
+  the last tab is this Scheduling / Check-in Portal
+  there are 2 form
+  Schedule Appointment Slot
+  Select Registered Patient*
+   here only few name is showing
+  Select Physician*
+  only one showing
+  how to test it i dont know
+  2nd form Active Direct Queue Check-In
+  i see this ui hardcoded error
+  Token Generation Engine Note: Direct arrivals bypass appointments. The token engine automatically fetches the current days maximum token size and increments.
+  Warning: Vulnerable to check-in race conditions!
+  Select Walk-in Patient*
+  only few
+  Assign Physician*
+  only 1
+  and there is in navbar there is live que which in 3 sec run but currently empty how this run

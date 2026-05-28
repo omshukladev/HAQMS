@@ -10,8 +10,8 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **Severity:** Critical
 - **File:** `frontend/src/app/dashboard/page.js:897`
 - **Problem:** `selectedPatientHistory.medicalHistory.toUpperCase()` crashes when `medicalHistory` is null. Seed data includes patients without medical history (Bruce Wayne, Clark Kent, Diana Prince).
-- **Fix:** Use optional chaining: `selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history'`
-- **Status:** Pending
+- **Fix:** Use optional chaining: `selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history recorded'`
+- **Status:** Fixed
 
 ### CRASH-2: Missing `Link` Import
 - **Severity:** Critical
@@ -32,7 +32,7 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/queue/page.js:41-55`
 - **Problem:** `setInterval` in `useEffect` has no cleanup function. Each mount spawns a new interval that runs forever. After 10 navigations to /queue, 10 intervals poll the server simultaneously.
 - **Fix:** Return cleanup function: `return () => clearInterval(intervalId)`
-- **Status:** Pending
+- **Status:** Fixed
 
 ### PERF-1: No Debounce on Patient Search
 - **Severity:** High
@@ -60,7 +60,7 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/dashboard/page.js:505`
 - **Problem:** Quick check-in uses `doctorsList[0]?.id` which is `undefined` if `doctorsList` hasn't loaded yet.
 - **Fix:** Add guard: disable button until `doctorsList.length > 0`
-- **Status:** Pending
+- **Status:** Fixed
 
 ### STALE-1: Stale Closure on refreshCount
 - **Severity:** Low
@@ -229,21 +229,18 @@ All discovered frontend issues organized by the internship evaluation challenges
 
 ## Priority Fix Order
 
-1. LEAK-1: Queue polling memory leak
-2. CRASH-1: Null medicalHistory crash
-3. SEC-1: JWT in localStorage
-4. FEAT-1: Build patient history-records page
-5. PERF-1: Debounce patient search
-6. DOM-1: Replace DOM anti-pattern with React state
-7. DOM-2: Guard undefined doctor
-8. SEC-3: Client-side role guard on delete
-9. UX-4: Error boundary
-10. UX-1: Loading states on submit buttons
-11. PERF-2: AbortController on fetches
-12. SEC-2: Hide hardcoded credentials
-13. STALE-2: Deduplicate doctors fetch
-14. UX-2: Password validation on login
-15. UX-3: Email input type
-16. FEAT-2: Patient detail page
-17. STALE-1: Stale closure refreshCount
-18. CODE-1-5: Cleanup items
+1. SEC-1: JWT in localStorage
+2. FEAT-1: Build patient history-records page
+3. PERF-1: Debounce patient search
+4. DOM-1: Replace DOM anti-pattern with React state
+5. SEC-3: Client-side role guard on delete
+6. UX-4: Error boundary
+7. UX-1: Loading states on submit buttons
+8. PERF-2: AbortController on fetches
+9. SEC-2: Hide hardcoded credentials
+10. STALE-2: Deduplicate doctors fetch
+11. UX-2: Password validation on login
+12. UX-3: Email input type
+13. FEAT-2: Patient detail page
+14. STALE-1: Stale closure refreshCount
+15. CODE-1-5: Cleanup items

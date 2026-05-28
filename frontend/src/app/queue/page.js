@@ -52,8 +52,8 @@ export default function QueueMonitor() {
       setRefreshCount((prev) => prev + 1);
     }, 3000);
 
-    // Junior Developer Note: "Interval created, will run forever to keep dashboard fully synced!"
-    // Missing: return () => clearInterval(intervalId);
+    // BUG FIX: Return cleanup function to clear interval on unmount, preventing memory leak
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Note that refreshCount dependency is missing too, causing stale closure on log!
 

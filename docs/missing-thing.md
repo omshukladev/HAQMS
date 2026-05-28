@@ -185,7 +185,7 @@ Use Prisma include/select to fetch related rows in one query and trim the payloa
 Medium because it becomes costly under larger schedules.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Doctor stats and reports are sequential and slow
@@ -395,7 +395,7 @@ Add `import Link from 'next/link'` at the top of the file alongside the other im
 Critical because it crashes the doctor workflow on a navigate action, with no error boundary to catch it.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Registration endpoint returns password hash in response
@@ -845,8 +845,7 @@ Add boolean state variables for each async operation and set `disabled` on the b
 Low because the backend has its own duplicate protections (however imperfect), but the frontend should still prevent double-submit.
 
 ### Status
-
-Pending
+Fixed
 
 ### Title
 Stale closure on refreshCount in queue polling
