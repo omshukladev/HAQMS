@@ -5,6 +5,7 @@ module.exports = defineConfig({
     globals: true,
     environment: "node",
     include: ["tests/**/*.test.js", "tests/**/*.spec.js"],
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],

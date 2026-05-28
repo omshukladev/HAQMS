@@ -590,3 +590,34 @@ Total: 42/42 tests passing, all green
 - Pagination: enforces limits, handles bounds
 - Performance: execution time tracking for parallelized queries
 - Auth: requires JWT token
+
+## 2026-05-28
+
+### Completed
+
+- Reviewed backend/src/routes/queue.js and confirmed the current fixes are in place.
+- Added backend/tests/queue.test.js with 12 tests covering:
+  - GET /api/queue default filtering, doctorId filtering, auth requirement
+  - POST /api/queue/checkin token generation, incrementing token numbers, validation, auth requirement
+  - PATCH /api/queue/:id valid transitions, invalid statuses, 404 handling, auth requirement
+- Verified queue test coverage passes locally.
+
+### Decisions
+
+- Matched the existing Vitest + Supertest style used in auth.test.js and doctors.test.js.
+- Kept the tests focused on the implemented behavior rather than assuming a retry-based concurrency strategy.
+- Seeded only the data required for each test to keep the assertions deterministic.
+
+### Problems Encountered
+
+- None blocking.
+
+### Next Steps
+
+- Run the full backend suite again if needed, then move on to the next route audit (appointments.js or patients.js).
+
+### Test Infrastructure
+
+- Updated backend/vitest.config.js to set `fileParallelism: false` so DB-backed test files run sequentially.
+- This prevents shared PostgreSQL cleanup in one file from deleting records required by another file.
+- Full backend suite now passes with 83 tests.

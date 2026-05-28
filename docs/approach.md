@@ -800,3 +800,250 @@ skip: skip || 0,  // ✅ Always provide a number
 - auth.test.js: 31 tests ✅  
 - middleware.test.js: 5 tests ✅
 - doctors.test.js: 29 tests ✅
+
+---
+
+# 4th i read queue.js and fixed 9 bugs
+
+## ERROR 1: Race Condition in Token Generation
+
+```js
+// BEFORE
+const currentMax = maxTokenResult._max.tokenNumber || 0;
+const nextTokenNumber = currentMax + 1;
+
+// Artificial 350ms sleep to simulate race window
+await new Promise((resolve) => setTimeout(resolve, 350));
+
+const newToken = await prisma.queueToken.create({
+  data: {
+    tokenNumber: nextTokenNumber,
+    ...
+  },
+});
+```
+
+> **Issue:** Read current max, sleep 350ms, then create. Two concurrent requests read the same `currentMax`, both create `currentMax + 1`. The unique constraint catches it, but one request crashes with a Prisma error. Under real production load, network latency causes this naturally without the sleep.
+>
+> **Fix:** Wrap read and create in a `$transaction` for atomic token generation
+
+```js
+// AFTER - BUG FIXED
+const newToken = await prisma.$transaction(async (tx) => {
+  const maxTokenResult = await tx.queueToken.aggregate({
+    where: { doctorId, queueDate: today },
+    _max: { tokenNumber: true },
+  });
+
+  const nextTokenNumber = (maxTokenResult._max.tokenNumber || 0) + 1;
+
+  return tx.queueToken.create({
+    data: {
+      tokenNumber: nextTokenNumber,
+      ...
+    },
+  });
+});
+```
+
+## ERROR 2: No Pagination in GET /
+
+```js
+// BEFORE
+const tokens = await prisma.queueToken.findMany({
+  where,
+  include: { patient: true, doctor: true },
+  orderBy: { createdAt: 'asc' },
+});
+res.json(tokens);
+```
+
+> **Issue:** Returns ALL tokens with no limit. On 10,000+ records, wastes memory and bandwidth. No way to page through results.
+>
+> **Fix:** Add pagination with safe defaults
+
+```js
+// AFTER - BUG FIXED
+const page = Math.max(1, parseInt(req.query.page || "1", 10));
+const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "50", 10)));
+const skip = (page - 1) * limit;
+
+const [total, tokens] = await Promise.all([
+  prisma.queueToken.count({ where }),
+  prisma.queueToken.findMany({ where, skip, take: limit, orderBy: { tokenNumber: "asc" }, select: {...} }),
+]);
+```
+
+## ERROR 3: Inconsistent Response Format in GET /
+
+```js
+// BEFORE
+res.json(tokens);
+```
+
+> **Issue:** Returns raw array directly. Doesn't match auth.js pattern of `{status, data}` structure.
+>
+> **Fix:** Standardize response format
+
+```js
+// AFTER - BUG FIXED
+res.json({
+  status: "success",
+  data: {
+    tokens,
+    pagination: { page, limit, total, totalPages },
+  },
+});
+```
+
+## ERROR 4: Error Detail Leak in All Routes
+
+```js
+// BEFORE
+res.status(500).json({ error: 'Failed to retrieve queue', details: error.message });
+res.status(500).json({ error: 'Check-in failed', details: error.message });
+res.status(500).json({ error: 'Failed to update queue token', details: error.message });
+```
+
+> **Issue:** Returns `details: error.message` on all three routes, exposing database schema info and Prisma errors to the client.
+>
+> **Fix:** Return generic message only, log details server-side
+
+```js
+// AFTER - BUG FIXED
+console.error("queue.list error:", error);
+res.status(500).json({ error: "Internal Server Error" });
+```
+
+## ERROR 5: Inconsistent Response Format in POST /checkin
+
+```js
+// BEFORE
+res.status(201).json({
+  message: 'Checked in successfully. Token generated.',
+  token: newToken,
+});
+```
+
+> **Issue:** Uses `{message, token}` format, different from auth.js `{status, data}` pattern.
+>
+> **Fix:** Match auth.js response pattern
+
+```js
+// AFTER - BUG FIXED
+res.status(201).json({
+  status: "success",
+  data: { token: newToken },
+});
+```
+
+## ERROR 6: No Default Date Filter in GET /
+
+```js
+// BEFORE
+const where = {};
+if (doctorId) where.doctorId = doctorId;
+if (status) where.status = status;
+// No date filter — returns tokens from ALL time
+```
+
+> **Issue:** No date filtering by default. Returns today's tokens AND yesterday's AND last month's. Queue board should show current day by default.
+>
+> **Fix:** Default to today's date
+
+```js
+// AFTER - BUG FIXED
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const where = { queueDate: today };
+if (doctorId) where.doctorId = doctorId;
+if (status) where.status = status;
+```
+
+## ERROR 7: No Status Validation in PATCH /:id
+
+```js
+// BEFORE
+if (!status) {
+  return res.status(400).json({ error: 'Status is required' });
+}
+// No check if status is a valid enum value
+```
+
+> **Issue:** Any string is accepted as status. Setting status to garbage string bypasses the QueueStatus enum entirely.
+>
+> **Fix:** Validate against valid statuses
+
+```js
+// AFTER - BUG FIXED
+const validStatuses = ["WAITING", "CALLING", "COMPLETED", "SKIPPED"];
+if (!validStatuses.includes(status)) {
+  return res.status(400).json({
+    error: "Invalid status. Must be one of: WAITING, CALLING, COMPLETED, SKIPPED",
+  });
+}
+```
+
+## ERROR 8: No 404 Check on PATCH /:id
+
+```js
+// BEFORE
+const updatedToken = await prisma.queueToken.update({
+  where: { id: req.params.id },
+  data: { status },
+});
+```
+
+> **Issue:** If token ID doesn't exist, Prisma throws `RecordNotFound` error caught as 500 with error detail leak instead of clean 404.
+>
+> **Fix:** Check token exists before updating
+
+```js
+// AFTER - BUG FIXED
+const existingToken = await prisma.queueToken.findUnique({
+  where: { id: req.params.id },
+});
+if (!existingToken) {
+  return res.status(404).json({ error: "Queue token not found" });
+}
+```
+
+## ERROR 9: Exposing Full Objects via include
+
+```js
+// BEFORE
+include: {
+  patient: true,
+  doctor: true,
+},
+```
+
+> **Issue:** Returns ALL fields of patient and doctor objects including sensitive data. Unbounded payload size.
+>
+> **Fix:** Use `select` to return only safe fields
+
+```js
+// AFTER - BUG FIXED
+select: {
+  id: true,
+  tokenNumber: true,
+  queueDate: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  patient: {
+    select: { id: true, name: true, phoneNumber: true },
+  },
+  doctor: {
+    select: { id: true, name: true, specialization: true, department: true },
+  },
+},
+```
+
+## All 83 Tests Pass After Fix
+
+- app.test.js: 6 tests ✅
+- auth.test.js: 31 tests ✅
+- middleware.test.js: 5 tests ✅
+- doctors.test.js: 29 tests ✅
+- queue.test.js: 12 tests ✅

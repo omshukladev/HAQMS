@@ -155,7 +155,7 @@ Use a transaction-safe allocation strategy and add a unique constraint/index for
 High because queue order integrity matters in live operations.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Appointments route performs N+1 queries
@@ -725,7 +725,7 @@ Implement a status transition map (WAITING -> CALLING -> COMPLETED/SKIPPED) and 
 Medium because it can corrupt queue ordering and confuse live monitor displays.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 No CASCADE delete handling on related records

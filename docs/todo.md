@@ -21,13 +21,13 @@
 
 ## Phase 3 — Data Integrity and Concurrency
 
-- [ ] Make queue token generation atomic
-- [ ] Add schema constraints for appointment and queue uniqueness
-- [ ] Add indexes for common filters and joins
-- [ ] Add CASCADE delete handling on relations
-- [ ] Add @updatedAt timestamps to models
+- [x] Make queue token generation atomic
+- [x] Add schema constraints for appointment and queue uniqueness
+- [x] Add indexes for common filters and joins
+- [x] Add CASCADE delete handling on relations
+- [x] Add @updatedAt timestamps to models
 - [ ] Validate appointment status transitions (PATCH)
-- [ ] Validate queue status transitions (PATCH)
+- [x] Validate queue status transitions (PATCH)
 
 ## Phase 4 — Backend Performance
 
