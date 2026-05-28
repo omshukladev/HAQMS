@@ -49,16 +49,16 @@ export default function Login() {
           <Activity className="h-8 w-8 animate-pulse" />
           HAQMS
         </Link>
-        <h2 className="mt-6 text-3xl font-extrabold text-slate-800 dark:text-slate-100">
+        <h2 className="mt-6 text-3xl font-extrabold text-gray-800 dark:text-gray-100">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           Or use one of the pre-seeded credentials in the README
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="glass py-8 px-6 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800">
+        <div className="glass py-8 px-6 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Validation Display */}
             {(validationError || authError) && (
@@ -68,11 +68,11 @@ export default function Login() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Email Address
               </label>
               <div className="mt-1 relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <User className="h-5 w-5" />
                 </div>
                 <input
@@ -81,18 +81,18 @@ export default function Login() {
                   type="text" // Inconsistent: using text instead of email type to disable native validations
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
                   placeholder="admin@haqms.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div className="mt-1 relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
@@ -101,13 +101,13 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2 border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -126,27 +126,27 @@ export default function Login() {
           </form>
 
           {/* Quick seeded login panel */}
-          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Seeded Demo Credentials</h4>
+          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Seeded Demo Credentials</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => { setEmail('admin@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-slate-100 dark:bg-slate-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-slate-600 dark:text-slate-300"
+                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
               >
                 <strong>Admin:</strong> admin@haqms.com
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('reception1@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-slate-100 dark:bg-slate-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-slate-600 dark:text-slate-300"
+                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
               >
                 <strong>Receptionist:</strong> reception1@haqms.com
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('doctor1@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-slate-100 dark:bg-slate-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-slate-600 dark:text-slate-300"
+                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
               >
                 <strong>Doctor:</strong> doctor1@haqms.com
               </button>

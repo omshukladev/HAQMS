@@ -16,7 +16,7 @@
 - [x] Add missing `Link` import in Dashboard component
 - [x] Fix null user crash on logout (optional chaining + null guard)
 - [x] Guard nullable medical history rendering
-- [ ] Guard doctor check-in against undefined matchedDoc
+- [x] Guard doctor check-in against undefined matchedDoc
 - [x] Fix queue polling interval cleanup
 - [ ] Fix stale closure on refreshCount
 

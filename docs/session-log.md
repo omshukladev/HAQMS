@@ -111,7 +111,48 @@ Update this file after major development sessions.
 
 ---
 
-## 2026-05-27 — Comprehensive Audit Pass
+## 2026-05-28 — UI Color Overhaul & ESLint Fixes
+
+### Completed
+
+- **Global CSS rewrite for light mode** — Redesigned `globals.css` with professional color scheme:
+  - Background: `#f0f2f5` (soft gray), foreground: `#1a1f2e` (dark navy)
+  - Primary: `#0d9488` (teal), refined shadow tokens for cards
+  - New utility classes: `.card`, `.btn-primary`, `.btn-secondary`, `.badge` variants, `.banner` variants, `.tab-bar`, `.tab-item`, `.status-dot`, custom scrollbar
+  - Improved `.glass` with hover elevation, refined form controls with focus ring
+- **Replaced all `slate-*` with `gray-*`** across dashboard, queue, login, landing, navbar for warmer tones
+- **Refined Navbar** — White background with backdrop-blur, teal brand box, hover states, user badge with teal border
+- **Fixed ESLint React 19 warnings** — Moved `set-state-in-effect` suppress comments to exact call sites in both dashboard and queue page
+- **Fixed Hydration mismatch** — Switched from `if (!user) return null` to `mounted` state pattern (loading skeleton before mount, full render after)
+- **Fixed build error** — Prisma code snippet with `{{ }}` wrapped in template literal to prevent JSX parsing as object literals
+- **Updated outdated warning banners** — SQL vulnerability alert and race condition warning changed to green "Fixed" banners
+- **Created `docs/qna.md`** — Interview Q&A covering localStorage vs cookies, JWT security, React 19 ESLint rules, fetchWithAuth pattern, null guard pattern
+
+### Files Changed
+
+- `frontend/src/app/globals.css` — Complete redesign with professional light theme
+- `frontend/src/app/dashboard/page.js` — Hydration fix, mounted pattern, ESLint comments, slate→gray, outdated banners
+- `frontend/src/app/queue/page.js` — slate→gray, ESLint comment placement
+- `frontend/src/app/login/page.js` — slate→gray
+- `frontend/src/app/page.js` — slate→gray
+- `frontend/src/components/common/Navbar.js` — Refined styling
+- `docs/qna.md` — New file created
+- `docs/frontend-errors.md` — Count and priority updated
+- `docs/frontend-approach.md` — FIX 9/10/11 added
+
+### Status
+
+- ✅ All critical crashes fixed (CRASH-1, CRASH-2, CRASH-3)
+- ✅ Memory leak fixed (LEAK-1), doctor guard fixed (DOM-2)
+- ✅ Hydration error fixed — dashboard renders cleanly
+- ✅ UI color scheme industry-level for light mode
+- ✅ Outdated warning banners updated to "Fixed"
+- ✅ Q&A doc created for interview preparation
+- ✅ All docs updated to reflect current state
+
+---
+
+## 2026-05-27
 
 ### Completed
 

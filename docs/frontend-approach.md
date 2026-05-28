@@ -434,40 +434,75 @@ return () => clearInterval(intervalId);
 
 **Next fixes planned:** Debounce patient search (PERF-1), Error boundary (UX-4), AbortController on fetches (PERF-2).
 
+---
+
+## FIX 12: Hydration Mismatch — Mounted State Pattern
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+### Before
+
+```js
+// Early return guard before JSX — caused SSR/CSR mismatch
+if (!user) return null;
+
+return (
+  <div className="...">
+    {/* full dashboard JSX */}
+  </div>
+);
+```
+
+> **Issue:** Next.js server-side rendering always sees `user` as null (no localStorage on server), so it renders null/empty. On the client, `user` is immediately available from localStorage, so React hydrates the full dashboard. This mismatch throws: `Hydration failed because the initial UI does not match what was rendered on the server`.
+
+### After
+
+```js
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+// Before mount: loading skeleton (matches server render)
+if (!mounted) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="pulse-loader"><div></div><div></div></div>
+    </div>
+  );
+}
+```
+
+> **Why This Fix:** The standard Next.js pattern for client-only content. Both server and client render a matching loading skeleton on the first pass. After hydration, `useEffect` fires, `mounted` becomes true, and real content renders. No mismatch, no hydration warning.
+
+### How to Test
+
+1. Hard refresh the dashboard page (Cmd+Shift+R)
+2. Observe: brief loading spinner, then dashboard loads normally
+3. Open browser console — no hydration errors or warnings
 
 ---
 
+## FIX 13: UI Color Scheme Overhaul
 
-ok its working now can you tell me whats left
-  what i can see in i login in using admin the 1st tab i see system audt report with a button when i click it it work fine with no latency error like we previsously getting
-  2nd tab i see is physican registry i see this red thing in ui SQL Vulnerability alert: This search executes raw interpolation:
-  SELECT * FROM "Doctor" WHERE name ILIKE '%{query}%'
-  Can be audited by inputting standard SQL injection strings to leak full user login lists.
-  is this ui / backend issue fix if ye how to test there is one search bar when i search name it work Dr. Gregory House
-  with this
-  [Pasted text #1 +3 lines]
-  3rd tab is Patient registry  Directory
-  it has 1 table Patient Lookup Directory
-  and one form New Registration in registration phone no is writen uncheckformat check this tooo the phone format we use is this 555-0101
-  [Pasted text #2 +6 lines]
-  i added my name and email and it worked my name show in table in table we have 2 button for each one for check in and one delete i press check it this ui pop up Error check-in:
-  Internal Server Error
-  then i press on delete alert pop up and said sucess
-  [Pasted text #3 +11 lines]
-  the last tab is this Scheduling / Check-in Portal
-  there are 2 form
-  Schedule Appointment Slot
-  Select Registered Patient*
-   here only few name is showing
-  Select Physician*
-  only one showing
-  how to test it i dont know
-  2nd form Active Direct Queue Check-In
-  i see this ui hardcoded error
-  Token Generation Engine Note: Direct arrivals bypass appointments. The token engine automatically fetches the current days maximum token size and increments.
-  Warning: Vulnerable to check-in race conditions!
-  Select Walk-in Patient*
-  only few
-  Assign Physician*
-  only 1
-  and there is in navbar there is live que which in 3 sec run but currently empty how this run
+**Files:** `frontend/src/app/globals.css`, all pages, Navbar
+
+### Before
+
+Light theme used `slate` tones with poor contrast — background too bright, no card depth, weak text contrast, no consistent shadow system.
+
+### After
+
+Professional color system:
+- **Background:** `#f0f2f5` soft warm gray
+- **Foreground:** `#1a1f2e` dark navy for contrast
+- **Primary:** `#0d9488` teal accent everywhere
+- **Cards:** White with subtle shadow tokens, hover lift effect
+- **All `slate-*` → `gray-*`** for warmer tones
+- **New utilities:** `.card`, `.btn-primary`, `.btn-secondary`, `.badge` variants, `.banner` variants, `.tab-bar`, `.status-dot`
+- **Navbar:** White with backdrop-blur, hover states, teal user badge
+
+### How to Test
+
+Open app in light mode — all screens polished. Dark mode still works. Hover interactions show smooth transitions.

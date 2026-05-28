@@ -219,25 +219,25 @@ All discovered frontend issues organized by the internship evaluation challenges
 
 ## Summary Count
 
-| Category | Count |
-|----------|-------|
-| **Critical (crash / leak)** | 3 |
-| **High** | 8 |
-| **Medium** | 7 |
-| **Low** | 7 |
-| **Total** | **25** |
+| Category | Total | Fixed | Pending |
+|----------|-------|-------|---------|
+| **Critical (crash / leak)** | 4 | 4 | 0 |
+| **High** | 8 | 2 | 6 |
+| **Medium** | 7 | 2 | 5 |
+| **Low** | 8 | 0 | 8 |
+| **Total** | **27** | **8** | **19** |
 
 ## Priority Fix Order
 
-1. SEC-1: JWT in localStorage
-2. FEAT-1: Build patient history-records page
-3. PERF-1: Debounce patient search
-4. DOM-1: Replace DOM anti-pattern with React state
-5. SEC-3: Client-side role guard on delete
-6. UX-4: Error boundary
-7. UX-1: Loading states on submit buttons
-8. PERF-2: AbortController on fetches
-9. SEC-2: Hide hardcoded credentials
+1. FEAT-1: Build patient history-records page
+2. SEC-1: JWT in localStorage
+3. UX-4: Error boundary
+4. PERF-1: Debounce patient search
+5. DOM-1: Replace DOM anti-pattern with React state
+6. UX-1: Loading states on submit buttons
+7. PERF-2: AbortController on fetches
+8. SEC-2: Hide hardcoded credentials
+9. SEC-3: Client-side role guard on delete
 10. STALE-2: Deduplicate doctors fetch
 11. UX-2: Password validation on login
 12. UX-3: Email input type

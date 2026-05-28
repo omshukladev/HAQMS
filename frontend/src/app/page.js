@@ -15,11 +15,11 @@ export default function Home() {
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent">
           HAQMS
         </h1>
-        <p className="text-xl sm:text-2xl font-bold mt-2 text-slate-700 dark:text-slate-200">
+        <p className="text-xl sm:text-2xl font-bold mt-2 text-gray-700 dark:text-gray-200">
           Hospital Appointment & Queue Management System
         </p>
         
-        <p className="mt-6 text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+        <p className="mt-6 text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
           Welcome to the HAQMS testing environment. This portal serves as a deliberately flawed, 
           fully functional reference application designed to evaluate software engineering candidates.
         </p>
@@ -28,15 +28,15 @@ export default function Home() {
         <div className="mt-12 grid gap-8 sm:grid-cols-2 max-w-2xl mx-auto">
           {/* Card 1: Staff Portal */}
           <Link href="/login" className="group">
-            <div className="glass p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 text-left hover:border-teal-500/50 hover:shadow-teal-500/10 transition-all duration-300 transform hover:-translate-y-1">
+            <div className="glass p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 text-left hover:border-teal-500/50 hover:shadow-teal-500/10 transition-all duration-300 transform hover:-translate-y-1">
               <div className="p-3 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl w-fit group-hover:bg-teal-500 group-hover:text-white transition-colors duration-300">
                 <Users className="h-6 w-6" />
               </div>
-              <h2 className="mt-6 text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="mt-6 text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                 Staff Portal
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </h2>
-              <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
+              <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
                 Access your specialized dashboard. Supports role-based workflows for Administrators, Doctors, and Receptionists.
               </p>
             </div>
@@ -44,15 +44,15 @@ export default function Home() {
 
           {/* Card 2: Public Queue Monitor */}
           <Link href="/queue" className="group">
-            <div className="glass p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 text-left hover:border-teal-500/50 hover:shadow-teal-500/10 transition-all duration-300 transform hover:-translate-y-1">
+            <div className="glass p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 text-left hover:border-teal-500/50 hover:shadow-teal-500/10 transition-all duration-300 transform hover:-translate-y-1">
               <div className="p-3 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl w-fit group-hover:bg-teal-500 group-hover:text-white transition-colors duration-300">
                 <MonitorPlay className="h-6 w-6" />
               </div>
-              <h2 className="mt-6 text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="mt-6 text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                 Live Public Monitor
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </h2>
-              <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
+              <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
                 Real-time active queue board tracking patient check-ins and calling tokens by physician. Built with live refresh.
               </p>
             </div>
@@ -65,8 +65,8 @@ export default function Home() {
             <ShieldAlert className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100">Assessment Environment Notice</h3>
-            <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm">
+            <h3 className="font-bold text-gray-800 dark:text-gray-100">Assessment Environment Notice</h3>
+            <p className="mt-1 text-gray-500 dark:text-gray-400 text-sm">
               This repository contains critical architectural, database performance, frontend memory, and security bugs. 
               Your evaluation criteria will measure your ability to identify, trace, profile, and fix these issues systematically.
             </p>
@@ -74,7 +74,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="text-center text-slate-400 dark:text-slate-500 text-xs mt-12">
+      <footer className="text-center text-gray-400 dark:text-gray-500 text-xs mt-12">
         HAQMS v1.0.0-deliberate-bugs &copy; {new Date().getFullYear()} Candidate Evaluation Framework.
       </footer>
     </div>
