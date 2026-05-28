@@ -33,7 +33,7 @@
 
 - [x] Eliminate N+1 queries in appointments
 - [x] Parallelize doctor stats queries
-- [ ] Rewrite nested report aggregation efficiently
+- [x] Rewrite nested report aggregation efficiently
 - [x] Move patient pagination and filtering into the database
 
 ## Phase 5 — API Standardization

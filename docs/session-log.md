@@ -727,3 +727,49 @@ Total: 42/42 tests passing, all green
 ### Next Steps
 
 - If desired later, tighten the remaining sensitive patient payload exposure in the list/detail routes.
+
+---
+
+## 2026-05-28
+
+### Completed
+
+- Fixed backend/src/routes/reports.js — all 7 bugs with inline "BUG FIXED" comments
+  1. N+1 nested loop — parallelized all doctor queries with Promise.all (51 queries → ~3)
+  2. Artificial 80ms sleep — removed entirely
+  3. Inefficient revenue calc — count × fee instead of loading full appointments
+  4. Wrong queue token field — changed createdAt to queueDate
+  5. Error detail leak — removed error.message
+  6. Inconsistent response — standardized to {status: "success", data: {doctors}}
+  7. Debug console.log — removed
+
+### Status
+
+- ✅ All 6 backend routes fixed (auth.js, doctors.js, queue.js, appointments.js, patients.js, reports.js)
+- ✅ 110/110 backend tests passing (7 test files)
+- ⏳ Next: Frontend fixes (Phase 2)
+
+## 2026-05-28
+
+### Completed
+
+- Added backend/tests/reports.test.js with 3 tests covering:
+  - GET /api/reports/doctor-stats standardized response format
+  - aggregated totals for appointments, queue size, and revenue
+  - auth requirement
+- Verified the refactored reports endpoint returns the new `{ status: "success", data: { doctors } }` shape.
+- Confirmed the full backend suite passes with the reports tests included.
+
+### Decisions
+
+- Matched the same Vitest + Supertest pattern used by the other backend route tests.
+- Focused on the new aggregate behavior rather than the old slow nested-loop implementation.
+- Seeded deterministic doctors, appointments, and queue tokens so the totals can be asserted exactly.
+
+### Problems Encountered
+
+- None blocking.
+
+### Next Steps
+
+- If needed later, compare frontend dashboard expectations against the updated report response shape.

@@ -1574,3 +1574,194 @@ const patient = await prisma.patient.findUnique({
 - queue.test.js: 12 tests ✅
 - appointments.test.js: 12 tests ✅
 - patients.test.js: 15 tests ✅
+
+---
+
+# 7th i read reports.js and fixed 7 bugs
+
+## ERROR 1: N+1 Nested Loop Queries (Performance)
+
+```js
+// BEFORE
+const doctors = await prisma.doctor.findMany();
+const reportData = [];
+
+for (const doc of doctors) {
+  console.log(`[SLOW REPORT] Querying stats sequentially for doctor: ${doc.name}`);
+
+  const totalAppointments = await prisma.appointment.count({
+    where: { doctorId: doc.id },
+  });
+
+  const completedAppointments = await prisma.appointment.count({
+    where: { doctorId: doc.id, status: 'COMPLETED' },
+  });
+
+  const cancelledAppointments = await prisma.appointment.count({
+    where: { doctorId: doc.id, status: 'CANCELLED' },
+  });
+
+  const queueTokensCount = await prisma.queueToken.count({
+    where: { doctorId: doc.id, createdAt: { gte: today } },
+  });
+
+  const appointmentsList = await prisma.appointment.findMany({
+    where: { doctorId: doc.id, status: 'COMPLETED' },
+  });
+  const revenue = appointmentsList.length * doc.consultationFee;
+
+  await new Promise(r => setTimeout(r, 80)); // Artificial 80ms delay
+
+  reportData.push({ ... });
+}
+```
+
+> **Issue:** For each doctor, runs 5 sequential queries + 80ms sleep. 10 doctors = 51 queries + 800ms wasted sleep. Revenue calculation loads all completed appointments just to get count.
+>
+> **Fix:** Use Promise.all to parallelize both across doctors and within each doctor's queries. Use count * fee for revenue.
+
+```js
+// AFTER - BUG FIXED
+const doctors = await prisma.doctor.findMany({
+  select: { id: true, name: true, specialization: true, department: true, consultationFee: true },
+});
+
+const reportData = await Promise.all(
+  doctors.map(async (doc) => {
+    const [totalAppointments, completedAppointments, cancelledAppointments, queueTokensCount] =
+      await Promise.all([
+        prisma.appointment.count({ where: { doctorId: doc.id } }),
+        prisma.appointment.count({ where: { doctorId: doc.id, status: "COMPLETED" } }),
+        prisma.appointment.count({ where: { doctorId: doc.id, status: "CANCELLED" } }),
+        prisma.queueToken.count({ where: { doctorId: doc.id, queueDate: today } }),
+      ]);
+
+    const revenue = completedAppointments * doc.consultationFee;
+
+    return { id: doc.id, name: doc.name, ... };
+  }),
+);
+```
+
+## ERROR 2: Artificial 80ms Sleep
+
+```js
+// BEFORE
+await new Promise(r => setTimeout(r, 80));
+// Junior dev comment: "Ensures database connection doesn't drop"
+```
+
+> **Issue:** Adds 80ms × number of doctors of pure wasted time. No legitimate purpose. The junior dev comment is incorrect — database connections don't drop between queries.
+>
+> **Fix:** Remove entirely
+
+```js
+// AFTER - BUG FIXED
+// Removed - no artificial delay
+```
+
+## ERROR 3: Inefficient Revenue Calculation
+
+```js
+// BEFORE
+const appointmentsList = await prisma.appointment.findMany({
+  where: { doctorId: doc.id, status: 'COMPLETED' },
+});
+const revenue = appointmentsList.length * doc.consultationFee;
+```
+
+> **Issue:** Loads ALL completed appointments (all fields, all rows) just to get the count. Memory waste for zero benefit.
+>
+> **Fix:** Multiply count by fee directly
+
+```js
+// AFTER - BUG FIXED
+const revenue = completedAppointments * doc.consultationFee;
+```
+
+## ERROR 4: Queue Token Filter Uses Wrong Field
+
+```js
+// BEFORE
+const queueTokensCount = await prisma.queueToken.count({
+  where: { doctorId: doc.id, createdAt: { gte: today } },
+});
+```
+
+> **Issue:** Uses `createdAt` instead of `queueDate`. After the schema change to add `queueDate`, this filter would miss tokens created today but with a yesterday's queue date (unlikely but semantically wrong).
+>
+> **Fix:** Use `queueDate` to match schema
+
+```js
+// AFTER - BUG FIXED
+const queueTokensCount = await prisma.queueToken.count({
+  where: { doctorId: doc.id, queueDate: today },
+});
+```
+
+## ERROR 5: Error Detail Leak
+
+```js
+// BEFORE
+res.status(500).json({ error: 'Failed to generate report', details: error.message });
+```
+
+> **Issue:** Returns `details: error.message` exposing database errors.
+>
+> **Fix:** Return generic message only
+
+```js
+// AFTER - BUG FIXED
+console.error("reports.doctorStats error:", error);
+res.status(500).json({ error: "Internal Server Error" });
+```
+
+## ERROR 6: Inconsistent Response Format
+
+```js
+// BEFORE
+res.json({
+  success: true,
+  timeTakenMs: durationMs,
+  data: reportData,
+});
+```
+
+> **Issue:** Uses `{success, timeTakenMs, data}` format. `timeTakenMs` leaks internal query timing to client.
+>
+> **Fix:** Match auth.js response pattern
+
+```js
+// AFTER - BUG FIXED
+res.json({
+  status: "success",
+  data: { doctors: reportData },
+});
+```
+
+## ERROR 7: Debug Console Log in Production
+
+```js
+// BEFORE
+console.log(`[SLOW REPORT] Querying stats sequentially for doctor: ${doc.name}`);
+```
+
+> **Issue:** Debug log in production code reveals internal query patterns.
+>
+> **Fix:** Remove
+
+```js
+// AFTER - BUG FIXED
+// Removed
+```
+
+## All 113 Tests Pass After Fix
+
+- app.test.js: 6 tests ✅
+- auth.test.js: 31 tests ✅
+- middleware.test.js: 5 tests ✅
+- doctors.test.js: 29 tests ✅
+- queue.test.js: 12 tests ✅
+- appointments.test.js: 12 tests ✅
+- patients.test.js: 15 tests ✅
+- reports.test.js: 3 tests ✅
