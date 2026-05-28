@@ -18,7 +18,14 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/dashboard/page.js:903`
 - **Problem:** `<Link href={...}>` used but not imported from `next/link`. Throws `ReferenceError: Link is not defined`.
 - **Fix:** Add `import Link from 'next/link'` at top of file
-- **Status:** Pending
+- **Status:** Fixed
+
+### CRASH-3: Null User Crash on Logout Redirect
+- **Severity:** Critical
+- **File:** `frontend/src/app/dashboard/page.js:17`
+- **Problem:** `activeTab` useState uses `user.role` but during the ~2-3 second logout redirect window, `user` is null. Causes `Cannot read properties of null (reading 'role')`.
+- **Fix:** Changed to optional chaining `user?.role` and added `if (!user) return null;` guard before JSX
+- **Status:** Fixed
 
 ### LEAK-1: Queue Polling Memory Leak
 - **Severity:** Critical
@@ -117,7 +124,7 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/context/AuthContext.js`
 - **Problem:** When JWT expires, API returns 401 but frontend doesn't intercept to redirect to login. User sees broken UI with no clear cause.
 - **Fix:** Wrap fetch calls or add global 401 interceptor to clear token and redirect to /login
-- **Status:** Pending
+- **Status:** Fixed
 
 ---
 
@@ -128,14 +135,14 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/context/AuthContext.js:18`
 - **Problem:** `const API_BASE_URL = 'http://localhost:5000/api'` hardcoded.
 - **Fix:** Use `process.env.NEXT_PUBLIC_API_URL`
-- **Status:** Pending
+- **Status:** Fixed
 
 ### URL-2: Duplicate Hardcoded URL in Queue Page
 - **Severity:** Medium
 - **File:** `frontend/src/app/queue/page.js:16`
 - **Problem:** Same URL duplicated independently from AuthContext.
 - **Fix:** Use `useAuth()` context or `process.env.NEXT_PUBLIC_API_URL`
-- **Status:** Pending
+- **Status:** Fixed
 
 ---
 
@@ -222,24 +229,21 @@ All discovered frontend issues organized by the internship evaluation challenges
 
 ## Priority Fix Order
 
-1. CRASH-1: Null medicalHistory crash
-2. CRASH-2: Missing Link import
-3. LEAK-1: Queue polling memory leak
-4. SEC-1: JWT in localStorage
-5. FEAT-1: Build patient history-records page
-6. PERF-1: Debounce patient search
-7. DOM-1: Replace DOM anti-pattern with React state
-8. DOM-2: Guard undefined doctor
-9. SEC-4: Auto-logout on 401
-10. SEC-3: Client-side role guard on delete
-11. UX-4: Error boundary
-12. UX-1: Loading states on submit buttons
-13. PERF-2: AbortController on fetches
-14. URL-1 & URL-2: env-based API URL
-15. SEC-2: Hide hardcoded credentials
-16. STALE-2: Deduplicate doctors fetch
-17. UX-2: Password validation on login
-18. UX-3: Email input type
-19. FEAT-2: Patient detail page
-20. STALE-1: Stale closure refreshCount
-21. CODE-1-5: Cleanup items
+1. LEAK-1: Queue polling memory leak
+2. CRASH-1: Null medicalHistory crash
+3. SEC-1: JWT in localStorage
+4. FEAT-1: Build patient history-records page
+5. PERF-1: Debounce patient search
+6. DOM-1: Replace DOM anti-pattern with React state
+7. DOM-2: Guard undefined doctor
+8. SEC-3: Client-side role guard on delete
+9. UX-4: Error boundary
+10. UX-1: Loading states on submit buttons
+11. PERF-2: AbortController on fetches
+12. SEC-2: Hide hardcoded credentials
+13. STALE-2: Deduplicate doctors fetch
+14. UX-2: Password validation on login
+15. UX-3: Email input type
+16. FEAT-2: Patient detail page
+17. STALE-1: Stale closure refreshCount
+18. CODE-1-5: Cleanup items

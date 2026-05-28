@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/common/Navbar';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Users, CalendarDays, Activity, Search, Sparkles, UserPlus, 
   Trash2, ClipboardList, TrendingUp, DollarSign, Award, Clock,
@@ -11,20 +11,10 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, token, API_BASE_URL, logout } = useAuth();
-  const router = useRouter();
-
-  // Navigation Guard
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user]);
-
-  if (!user) return null;
+  const { user, token, API_BASE_URL, fetchWithAuth, logout } = useAuth();
 
   // Global State
-  const [activeTab, setActiveTab] = useState(user.role === 'ADMIN' ? 'reports' : user.role === 'RECEPTIONIST' ? 'patients' : 'appointments');
+  const [activeTab, setActiveTab] = useState(user?.role === 'ADMIN' ? 'reports' : user?.role === 'RECEPTIONIST' ? 'patients' : 'appointments');
 
   // ==========================================
   // STATE FOR RECEPTIONIST WORKFLOWS
@@ -76,16 +66,15 @@ export default function Dashboard() {
     setPatientsLoading(true);
     try {
       // Inefficient memory pagination called from client
-      const res = await fetch(`${API_BASE_URL}/patients?page=${page}&limit=5&search=${patientSearch}&gender=${patientGender}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth(`/patients?page=${page}&limit=5&search=${patientSearch}&gender=${patientGender}`);
       const data = await res.json();
-      if (data.success) {
-        setPatients(data.patients);
+      // BUG FIX: Handle standardized response envelope
+      if (data.status === 'success') {
+        setPatients(data.data.patients);
         setPatientsPagination({
-          page: data.pagination.page,
-          totalPages: data.pagination.totalPages,
-          totalPatients: data.pagination.totalPatients
+          page: data.data.pagination.page,
+          totalPages: data.data.pagination.totalPages,
+          totalPatients: data.data.pagination.totalPatients
         });
       }
     } catch (e) {
@@ -98,25 +87,30 @@ export default function Dashboard() {
   // Trigger Patient List Fetch (Every keystroke trigger re-renders parent! - Performance bug)
   useEffect(() => {
     if (user.role === 'RECEPTIONIST' || user.role === 'ADMIN') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPatients(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientSearch, patientGender]);
 
   // Fetch Doctors for booking drop-down
   const fetchDoctorsDropdown = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/doctors`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth('/doctors');
       const data = await res.json();
-      setDoctorsList(data);
+      // BUG FIX: Extract doctors array from standardized response envelope
+      if (data.status === 'success') {
+        setDoctorsList(data.data.doctors);
+      }
     } catch (e) {
       console.error(e);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDoctorsDropdown();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle Patient Registration
@@ -132,12 +126,8 @@ export default function Dashboard() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/patients`, {
+      const res = await fetchWithAuth('/patients', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           name: regName,
           email: regEmail,
@@ -178,12 +168,8 @@ export default function Dashboard() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/appointments`, {
+      const res = await fetchWithAuth('/appointments', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           patientId: bookingPatientId,
           doctorId: bookingDoctorId,
@@ -209,13 +195,11 @@ export default function Dashboard() {
   const handleDeletePatient = async (id) => {
     if (!confirm('Are you sure you want to delete this patient record?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/patients/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth(`/patients/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (res.ok) {
-        alert(data.message || 'Patient deleted.');
+      // BUG FIX: Handle standardized response envelope
+      if (res.ok && data.status === 'success') {
+        alert(data.data.message || 'Patient deleted.');
         fetchPatients(patientsPagination.page);
       } else {
         alert(`Error: ${data.error || 'Unauthorized deletion!'}`);
@@ -229,17 +213,14 @@ export default function Dashboard() {
   const handleQueueCheckin = async (patientId, doctorId, appointmentId = null) => {
     setCheckinMessage('');
     try {
-      const res = await fetch(`${API_BASE_URL}/queue/checkin`, {
+      const res = await fetchWithAuth('/queue/checkin', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ patientId, doctorId, appointmentId })
       });
       const data = await res.json();
-      if (res.ok) {
-        setCheckinMessage(`Checked in! Generated Token #${data.token.tokenNumber}`);
+      // BUG FIX: Handle standardized response envelope
+      if (res.ok && data.status === 'success') {
+        setCheckinMessage(`Checked in! Generated Token #${data.data.token.tokenNumber}`);
         if (user.role === 'DOCTOR') fetchDoctorWorklist();
       } else {
         setCheckinMessage(`Error check-in: ${data.error}`);
@@ -260,20 +241,20 @@ export default function Dashboard() {
       if (!matchedDoc) return;
 
       // 1. Fetch appointments for this doctor (N+1 database queries triggers inside server)
-      const appRes = await fetch(`${API_BASE_URL}/appointments?doctorId=${matchedDoc.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const appRes = await fetchWithAuth(`/appointments?doctorId=${matchedDoc.id}`);
       const appData = await appRes.json();
-      if (appData.success) {
-        setDoctorAppointments(appData.appointments);
+      // BUG FIX: Handle standardized response envelope
+      if (appData.status === 'success') {
+        setDoctorAppointments(appData.data.appointments);
       }
 
       // 2. Fetch queue list for this doctor today
-      const queueRes = await fetch(`${API_BASE_URL}/queue?doctorId=${matchedDoc.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const queueRes = await fetchWithAuth(`/queue?doctorId=${matchedDoc.id}`);
       const queueData = await queueRes.json();
-      setDoctorQueue(queueData);
+      // BUG FIX: Extract from standardized envelope
+      if (queueData.status === 'success') {
+        setDoctorQueue(queueData.data.tokens);
+      }
 
     } catch (e) {
       console.error(e);
@@ -284,17 +265,14 @@ export default function Dashboard() {
     if (user.role === 'DOCTOR' && doctorsList.length > 0) {
       fetchDoctorWorklist();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctorsList]);
 
   // Update token status (WAITING -> CALLING -> COMPLETED / SKIPPED)
   const handleUpdateQueueStatus = async (tokenId, newStatus) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/queue/${tokenId}`, {
+      const res = await fetchWithAuth(`/queue/${tokenId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
@@ -308,12 +286,8 @@ export default function Dashboard() {
   // Complete consultation of an appointment
   const handleCompleteAppointment = async (appId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/appointments/${appId}`, {
+      const res = await fetchWithAuth(`/appointments/${appId}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ status: 'COMPLETED' })
       });
       if (res.ok) {
@@ -333,12 +307,11 @@ export default function Dashboard() {
     setAdminReportLoading(true);
     try {
       // Calls slow nested aggregation endpoint
-      const res = await fetch(`${API_BASE_URL}/reports/doctor-stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth('/reports/doctor-stats');
       const data = await res.json();
-      if (data.success) {
-        setAdminReportData(data);
+      // BUG FIX: Handle standardized response envelope
+      if (data.status === 'success') {
+        setAdminReportData({ doctors: data.data.doctors });
       }
     } catch (e) {
       console.error(e);
@@ -350,19 +323,18 @@ export default function Dashboard() {
   // Search Doctors (SQL Injection vulnerable API!)
   const searchPhysiciansAdmin = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/doctors?search=${adminSearchQuery}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetchWithAuth(`/doctors?search=${adminSearchQuery}`);
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setDoctorsList(data);
-      } else {
-        alert(`API Error: ${data.sqlMessage || data.error}`);
+      // BUG FIX: Handle standardized response envelope
+      if (data.status === 'success') {
+        setDoctorsList(data.data.doctors);
       }
     } catch (e) {
       console.error(e);
     }
   };
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -1022,31 +994,22 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-6">
                   {/* Reporting details benchmark */}
-                  <div className="flex items-center gap-3 p-3 bg-amber-500/10 text-slate-700 dark:text-slate-300 text-xs rounded-lg border border-amber-500/20 leading-5">
-                    <Clock className="h-5 w-5 text-amber-500 shrink-0" />
-                    <div>
-                      <strong>Performance Diagnostic:</strong> API execution resolved in{' '}
-                      <span className="font-bold text-amber-500">{adminReportData.timeTakenMs} ms</span>. 
-                      Sequential nested database calls loops reduce throughput. Optimization using Promise.all or single join aggregate is required.
-                    </div>
-                  </div>
-
                   {/* Summary widgets */}
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="p-4 bg-slate-500/5 border border-slate-200 dark:border-slate-800 rounded-xl">
                       <span className="text-xxs uppercase tracking-wider text-slate-400 font-bold">Total Physicians</span>
-                      <h4 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">{adminReportData.data.length}</h4>
+                      <h4 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">{adminReportData.doctors.length}</h4>
                     </div>
                     <div className="p-4 bg-slate-500/5 border border-slate-200 dark:border-slate-800 rounded-xl">
                       <span className="text-xxs uppercase tracking-wider text-slate-400 font-bold">Sum appointments</span>
                       <h4 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
-                        {adminReportData.data.reduce((sum, item) => sum + item.totalAppointments, 0)}
+                        {adminReportData.doctors.reduce((sum, item) => sum + item.totalAppointments, 0)}
                       </h4>
                     </div>
                     <div className="p-4 bg-slate-500/5 border border-slate-200 dark:border-slate-800 rounded-xl">
                       <span className="text-xxs uppercase tracking-wider text-slate-400 font-bold">Total Sales ($)</span>
                       <h4 className="text-2xl font-black text-teal-600 dark:text-teal-400 mt-1">
-                        ${adminReportData.data.reduce((sum, item) => sum + item.revenue, 0)}
+                        ${adminReportData.doctors.reduce((sum, item) => sum + item.revenue, 0)}
                       </h4>
                     </div>
                   </div>
@@ -1064,7 +1027,7 @@ export default function Dashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                        {adminReportData.data.map((item) => (
+                        {adminReportData.doctors.map((item) => (
                           <tr key={item.id} className="hover:bg-slate-500/5 transition-colors">
                             <td className="py-3.5 font-bold text-slate-800 dark:text-slate-200">
                               {item.name}

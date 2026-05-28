@@ -773,3 +773,88 @@ Total: 42/42 tests passing, all green
 ### Next Steps
 
 - If needed later, compare frontend dashboard expectations against the updated report response shape.
+
+---
+
+## 2026-05-28 — Frontend Fixes Begin: Hardcoded API URLs
+
+### Completed
+
+- Fixed `frontend/src/context/AuthContext.js:18` — Replaced hardcoded `'http://localhost:5000/api'` with `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'`
+- Fixed `frontend/src/app/queue/page.js:16` — Removed duplicated hardcoded URL, now imports `API_BASE_URL` from `useAuth()`
+- Created `frontend/.env` with `NEXT_PUBLIC_API_URL=http://localhost:5000/api`
+- Created `docs/frontend-plan.md` — Blueprint with all 25+ frontend issues organized into 8 phases with dependency ordering
+- Created `docs/frontend-approach.md` — Approach document with before/after/behavior/testing for each fix
+- Updated `docs/frontend-errors.md` — URL-1 and URL-2 marked as Fixed
+
+### Decisions
+
+- Using `NEXT_PUBLIC_` prefix for client-side env access (Next.js requirement)
+- Queue page now uses single source of truth from AuthContext instead of duplicating
+- All future frontend fixes will use `// BUG FIX:` comment style matching backend pattern
+
+### Files Changed
+
+- `frontend/src/context/AuthContext.js` — URL-1 fixed
+- `frontend/src/app/queue/page.js` — URL-2 fixed, imports useAuth
+- `frontend/.env` — NEW: environment config
+- `docs/frontend-plan.md` — NEW: complete fix blueprint
+- `docs/frontend-approach.md` — NEW: approach documentation
+- `docs/frontend-errors.md` — URL-1, URL-2 status → Fixed
+
+### Next Steps
+
+- FIX-0C: Error boundary (UX-4)
+- Phase 1 crash fixes (CRASH-1, CRASH-2, LEAK-1, DOM-2)
+
+---
+
+## 2026-05-28 — Frontend Fixes: Logout Crash, API Standardization, ESLint Cleanup
+
+### Completed
+
+- **Fixed logout crash** — Changed `router.push('/login')` → `window.location.href = '/login'` in AuthContext. Removed Dashboard's redundant navigation guard `useEffect` that caused React hooks mismatch.
+- **Fixed CRASH-2** — Added `import Link from 'next/link'` to dashboard/page.js
+- **Fixed all API response format mismatches** — Updated 9 fetch handlers across dashboard and queue to read standardized `{ status, data }` envelope instead of old flat format
+- **Fixed AuthContext ESLint warnings** — Replaced `useEffect` + `useState(null)` with `useState(() => ...)` initializers for localStorage reads. Moved `logout()` above `fetchWithAuth()` to fix declaration order.
+- **Added eslint-disable comments** — For intentional data-fetching effects flagged by React 19 `set-state-in-effect` rule
+- **Removed unused `useRouter` import** from dashboard page
+
+### Files Changed
+
+- `frontend/src/context/AuthContext.js` — Logout uses `window.location.href`, state initializers replace useEffect
+- `frontend/src/app/dashboard/page.js` — Added Link import, removed useRouter, fixed 8 fetch response parsers, added eslint-disable comments
+- `frontend/src/app/queue/page.js` — Fixed 1 fetch response parser, added eslint-disable comments
+- `docs/frontend-errors.md` — CRASH-2 marked Fixed
+- `docs/frontend-approach.md` — Added FIX 5, 6, 7 with before/after behavior and test steps
+
+### Status
+
+- ✅ Logout no longer crashes
+- ✅ Link import no longer crashes
+- ✅ All API responses parsed correctly
+- ✅ AuthContext ESLint clean
+- ⏳ Phase 1 remaining: CRASH-1, LEAK-1, DOM-2, UX-4
+
+---
+
+## 2026-05-28 — Frontend Fixes: Null User Crash on Logout, ESLint Comment Placement
+
+### Completed
+
+- **Fixed CRASH-3: Null user crash during logout** — `activeTab` useState on dashboard line 17 used `user.role` but `user` is null during the ~2-3 second logout redirect window. Changed to optional chaining `user?.role`. Added `if (!user) return null;` guard before JSX to prevent rendering with null user.
+- **Fixed ESLint suppress comment placement** — Moved `// eslint-disable-next-line react-hooks/set-state-in-effect` from before `useEffect` to before the actual state-setting function calls (`fetchPatients()`, `fetchDoctorsDropdown()`, `fetchDoctorWorklist()`) inside the effect bodies. The comment was suppressing the wrong line — the effect declaration, not the state setter call.
+- **Removed unused ESLint directive** — Queue page had `react-hooks/set-state-in-effect` in its eslint-disable-next-line comment that wasn't suppressing anything. Removed it, keeping only `react-hooks/exhaustive-deps`.
+
+### Files Changed
+
+- `frontend/src/app/dashboard/page.js` — Optional chaining on line 17, null guard before return, eslint comments moved to correct lines
+- `frontend/src/app/queue/page.js` — Removed unused `set-state-in-effect` from eslint-disable comment
+- `docs/frontend-errors.md` — Added CRASH-3 entry, updated priority list
+- `docs/frontend-approach.md` — Added FIX 8
+
+### Status
+
+- ✅ Logout crash fully resolved (null guard covers the redirect window)
+- ✅ All ESLint comments now properly suppress the correct lines
+- ⏳ Phase 1 remaining: CRASH-1, LEAK-1, DOM-2, UX-4

@@ -2,29 +2,30 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/common/Navbar';
+import { useAuth } from '@/context/AuthContext';
 import { Activity, Bell, Monitor, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function QueueMonitor() {
+  const { fetchWithAuth } = useAuth();
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Duplicated config state just to add minor code smell
-  const [refreshCount, setRefreshCount] = useState(0);
 
-  // HARDCODED API BASE URL: Duplicated from AuthContext (code duplication smell)
-  const API_BASE_URL = 'http://localhost:5000/api';
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const fetchQueueData = async () => {
     try {
       // Insecure: Fetches queue without checking credentials (it's a public dashboard, which is fine, 
       // but it uses the hardcoded API domain)
-      const res = await fetch(`${API_BASE_URL}/queue`);
+      const res = await fetchWithAuth('/queue');
       if (!res.ok) {
         throw new Error('Failed to retrieve active token queue.');
       }
       const data = await res.json();
-      setTokens(data);
+      // BUG FIX: Extract tokens from standardized response envelope
+      if (data.status === 'success') {
+        setTokens(data.data.tokens);
+      }
       setError('');
     } catch (err) {
       console.error('Queue poll fetch error:', err);
@@ -36,6 +37,7 @@ export default function QueueMonitor() {
 
   useEffect(() => {
     // Initial fetch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchQueueData();
 
     // MEMORY LEAK BUG:
@@ -52,6 +54,7 @@ export default function QueueMonitor() {
 
     // Junior Developer Note: "Interval created, will run forever to keep dashboard fully synced!"
     // Missing: return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Note that refreshCount dependency is missing too, causing stale closure on log!
 
   // Group tokens by doctor

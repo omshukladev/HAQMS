@@ -13,7 +13,8 @@
 
 ## Phase 2 — Frontend Crash Fixes
 
-- [ ] Add missing `Link` import in Dashboard component
+- [x] Add missing `Link` import in Dashboard component
+- [x] Fix null user crash on logout (optional chaining + null guard)
 - [ ] Guard nullable medical history rendering
 - [ ] Guard doctor check-in against undefined matchedDoc
 - [ ] Fix queue polling interval cleanup
@@ -39,13 +40,17 @@
 ## Phase 5 — API Standardization
 
 - [x] Define consistent API response envelope and apply to all endpoints
-- [ ] Update frontend to handle standardized responses
+- [x] Update frontend to handle standardized responses
 
 ## Phase 6 — Frontend Stability
 
+- [x] Replace hardcoded API URL with env var in AuthContext
+- [x] Remove duplicated API URL in queue page
+- [x] Add auto-logout on 401 responses (fetchWithAuth wrapper)
+- [x] Fix ESLint React 19 warnings (state initializers, comment placement)
+- [x] Create .env file with NEXT_PUBLIC_API_URL
 - [ ] Add AbortController to fetch calls in dashboard
 - [ ] Convert DOM getElementById refs to React state
-- [ ] Add auto-logout on 401 responses
 - [ ] Add loading/disabled state to submit buttons
 - [ ] Improve dashboard search and fetch behavior
 - [ ] Implement the missing patient history route
