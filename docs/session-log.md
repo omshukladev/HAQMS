@@ -18,6 +18,12 @@ Update this file after major development sessions.
 - Added a clean Markdown problems table in `docs/table.md` with total count, file locations, and easy/medium/hard ratings.
 - Synced `docs/table.md` with the current issue backlog count after additional findings were documented.
 
+### Auth Route Review
+
+- Re-read `backend/src/routes/auth.js` to verify the current error surface.
+- Confirmed the route still has multiple security issues: plaintext credential logging, password hash leakage on register, weak JWT secret fallback, long-lived token expiry, and inconsistent error handling/response shapes.
+- Existing documentation already covers these issues, so no new backlog item was added from this pass.
+
 ### Decisions
 
 - Keep the log readable with markdown headings instead of a raw prose dump.
@@ -155,3 +161,136 @@ backend/
 
 - Continue with Phase 1 security fixes (auth routes, SQL injection, admin auth bypass)
 - Document approach in approach.md
+
+---
+
+## 2026-05-28 — Auth.js Security Fixes
+
+### Completed
+
+- **Fixed 11 critical/high security issues in backend/src/routes/auth.js:**
+  1. Removed hardcoded JWT_SECRET fallback (line 8) — Now uses `process.env.JWT_SECRET` only
+  2. Removed plaintext credential logging from register endpoint (line 14)
+  3. Added email format and password strength validation (lines 15-26)
+  4. Fixed password hash leak in register response — Now returns standardized `status/data/token/user` format (lines 47-66)
+  5. Removed database error exposure from register error handler (lines 67-73)
+  6. Removed plaintext password from login console log (line 80)
+  7. Added email format and password strength validation on login (lines 84-95)
+  8. Fixed JWT expiry from 365 days to 7 hours (configurable via JWT_EXPIRY env var, line 96 & 111)
+  9. Standardized login response format to match register (lines 114-126)
+  10. Removed error stack leak from login error handler (line 130)
+  11. Fixed /me endpoint to use standardized response format (lines 147-153)
+  12. Bonus: Added console.error logging to /me error handler (line 155)
+
+### Security Improvements
+
+- **Eliminated credential exposure** — No passwords or hashes leak via logs or API responses
+- **Enforced environment secrets** — System now fails fast if JWT_SECRET is missing (no unsafe fallback)
+- **Reduced token lifetime** — 7 hours instead of 365 days minimizes exposure window if token is compromised
+- **Standardized API responses** — Frontend will now receive consistent format across all auth endpoints
+
+### API Response Format (Now Consistent)
+
+```json
+{
+  "status": "success",
+  "data": {
+    "token": "jwt-token-here",
+    "user": {
+      "id": "...",
+      "email": "...",
+      "name": "...",
+      "role": "..."
+    }
+  }
+}
+```
+
+### Files Changed
+
+- `backend/src/routes/auth.js` — Complete security audit and fixes applied
+
+### Status
+
+- ✅ All 11 auth.js issues **FIXED**
+- ✅ Updated `docs/table.md` to track status (2/14 issues fixed)
+- ⏳ Next: Move to doctors.js (SQL injection fix)
+
+---
+
+## 2026-05-28 — Auth.js Test Suite & Validation Logic Fix
+
+### Completed
+
+- **Created comprehensive test suite** (`backend/tests/auth.test.js`):
+  - 31 tests covering all auth endpoints (register, login, /me)
+  - Tests for security (no credential leaks, no stack traces)
+  - Tests for validation (email format, password strength)
+  - Tests for API response consistency
+  - Tests for JWT token generation and expiry
+
+- **Fixed validation logic bug discovered during testing:**
+  - Original issue: Email/password validation only ran if other fields were missing
+  - Fixed: Now validates format BEFORE checking required fields
+  - Result: Register now rejects invalid emails even if all fields present
+  - Result: Login now rejects weak passwords consistently
+
+### Test Results
+
+```
+✓ tests/auth.test.js (31 tests) 2613ms
+  Tests  31 passed (31)
+```
+
+### Test Coverage
+
+| Area | Tests | Status |
+|------|-------|--------|
+| Register endpoint | 10 | ✅ Pass |
+| Login endpoint | 10 | ✅ Pass |
+| Me endpoint | 7 | ✅ Pass |
+| Response consistency | 1 | ✅ Pass |
+| Security checks | 3 | ✅ Pass |
+| **Total** | **31** | **✅ Pass** |
+
+### Key Tests Implemented
+
+- ✅ Valid registration returns token + non-sensitive user data
+- ✅ Login with valid credentials returns JWT
+- ✅ Invalid email format rejected on register & login
+- ✅ Password < 6 chars rejected on register & login
+- ✅ Duplicate email registration rejected
+- ✅ Me endpoint requires valid token
+- ✅ All endpoints use consistent `status/data` response format
+- ✅ No plaintext passwords leak in responses
+- ✅ JWT token has reasonable expiry (1-24 hours)
+- ✅ Error stack traces never exposed to client
+
+### Files Changed
+
+- `backend/tests/auth.test.js` — NEW: 31-test comprehensive suite
+- `backend/src/routes/auth.js` — Improved validation logic
+
+### Architecture Improvement
+
+Fixed validation order from:
+```javascript
+// ❌ OLD: Validation nested inside required field check
+if (!email || !password || !name) {
+  if (email && !/\S+@\S+\.\S+/.test(email)) { ... }
+}
+```
+
+To:
+```javascript
+// ✅ NEW: Separate, clear validation steps
+if (!email || !password || !name) { ... }
+if (!/\S+@\S+\.\S+/.test(email)) { ... }
+if (password.length < 6) { ... }
+```
+
+### Status
+
+- ✅ auth.js fully tested (31/31 tests passing)
+- ✅ Validation logic corrected and verified
+- ✅ Ready for next route fixes (doctors.js)
