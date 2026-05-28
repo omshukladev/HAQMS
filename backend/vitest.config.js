@@ -10,8 +10,10 @@ module.exports = defineConfig({
       reporter: ["text", "lcov"],
       include: ["src/app.js"],
     },
-    // Use local Docker PostgreSQL for tests (dev uses Neon via .env)
-    env: {
+    // Locally: use Docker PostgreSQL so tests don't hit Neon.
+    // In CI: DATABASE_URL is set by the CI workflow (PostgreSQL service container),
+    // so don't override it.
+    env: process.env.CI ? {} : {
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/haqms?schema=public",
     },
   },
