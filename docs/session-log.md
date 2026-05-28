@@ -294,3 +294,32 @@ if (password.length < 6) { ... }
 - ✅ auth.js fully tested (31/31 tests passing)
 - ✅ Validation logic corrected and verified
 - ✅ Ready for next route fixes (doctors.js)
+
+---
+
+## 2026-05-28 — CI Pipeline Setup
+
+### Completed
+
+- Created `.github/workflows/ci.yml` with proper CI pipeline for running 37 tests in GitHub Actions
+- Added PostgreSQL 15 service container with health checks for database-dependent auth tests
+- Added `prisma generate` and `prisma migrate deploy` steps before test execution
+- Configured required env vars (`DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `NODE_ENV`)
+
+### Problems Encountered
+
+- `act` (local CI runner) failed with port 5432 already in use — local haqms-postgres container was still running from `docker-compose up`
+- Fix: Stop local PostgreSQL before running `act`, or use `docker stop haqms-postgres`
+
+### CI Pipeline Steps
+
+1. Start PostgreSQL 15 service container
+2. Checkout code and setup Node 22 with npm cache
+3. Install dependencies
+4. Generate Prisma client
+5. Apply migrations via `prisma migrate deploy`
+6. Run all 37 tests (auth + app)
+
+### Files Changed
+
+- `.github/workflows/ci.yml` — Full CI pipeline with database service
