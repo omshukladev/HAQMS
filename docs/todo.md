@@ -34,11 +34,11 @@
 - [x] Eliminate N+1 queries in appointments
 - [x] Parallelize doctor stats queries
 - [ ] Rewrite nested report aggregation efficiently
-- [ ] Move patient pagination and filtering into the database
+- [x] Move patient pagination and filtering into the database
 
 ## Phase 5 — API Standardization
 
-- [ ] Define consistent API response envelope and apply to all endpoints
+- [x] Define consistent API response envelope and apply to all endpoints
 - [ ] Update frontend to handle standardized responses
 
 ## Phase 6 — Frontend Stability
@@ -52,9 +52,9 @@
 
 ## Phase 7 — Input Validation
 
-- [ ] Add backend validation for phone number format
-- [ ] Add backend validation for age range bounds
-- [ ] Add backend validation for email format
+- [x] Add backend validation for phone number format
+- [x] Add backend validation for age range bounds
+- [x] Add backend validation for email format
 - [ ] Add frontend validation parity
 
 ## Phase 8 — Cleanup and Documentation

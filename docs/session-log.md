@@ -674,3 +674,56 @@ Total: 42/42 tests passing, all green
 ### Next Steps
 
 - If needed, tighten appointments list field exposure later (medicalHistory is still returned in the patient payload).
+
+---
+
+## 2026-05-28
+
+### Completed
+
+- Fixed backend/src/routes/patients.js — all 10 bugs with inline "BUG FIXED" comments
+  1. In-memory pagination — moved to database-level take/skip with Prisma
+  2. In-memory search filter — moved to Prisma where with OR + contains
+  3. Error detail leaks — removed error.message from all 4 routes
+  4, 5, 6, 7. Inconsistent response formats — standardized to {status: "success", data: {...}} on GET, GET/:id, POST, DELETE
+  8. Phone validation — added phoneClean regex (7-15 digits, optional +)
+  9. Age validation — added range check (0-150) with NaN guard
+  10. Field exposure in GET /:id — replaced include with select + nested select
+
+### Decisions
+
+- Phone number is cleaned (strip dashes/spaces/parentheses) before storage for consistent search
+- Age parseint with radix 10 to avoid octal edge cases
+- Appointments in patient detail ordered by date desc (most recent first)
+
+### Status
+
+- ✅ patients.js fully fixed
+- ✅ 95/95 backend tests passing (6 test files)
+- ⏳ Last route: reports.js
+
+## 2026-05-28
+
+### Completed
+
+- Added backend/tests/patients.test.js with 15 tests covering:
+  - GET /api/patients list search, gender filtering, pagination, auth
+  - GET /api/patients/:id details, appointments, 404, auth
+  - POST /api/patients validation, creation, auth
+  - DELETE /api/patients/:id admin-only deletion, 404, auth
+- Verified the patients route behavior after the current fixes.
+- Confirmed the full backend suite now passes with the patients tests included.
+
+### Decisions
+
+- Matched the same Vitest + Supertest pattern used by the other backend route tests.
+- Seeded test doctors/patients before each test so the assertions stay deterministic.
+- Covered the standardized `{ status: "success", data: ... }` response shape in tests.
+
+### Problems Encountered
+
+- None blocking.
+
+### Next Steps
+
+- If desired later, tighten the remaining sensitive patient payload exposure in the list/detail routes.
