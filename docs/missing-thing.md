@@ -86,7 +86,16 @@ Switch to Prisma filters or parameterized raw queries only if raw SQL is unavoid
 Critical because it can expose user and medical data.
 
 ### Status
-Pending
+Fixed
+
+### Fix Summary
+- Replaced unsafe $queryRawUnsafe usage with Prisma query filters (findMany + where).
+- Added pagination (page, limit) and caps to avoid heavy responses.
+- Sanitized and standardized API responses; errors now return generic messages and are logged server-side.
+- Optimized stats endpoint to run independent queries in parallel with Promise.all.
+
+### Estimated Verification
+- Unit tests for doctors endpoints should cover search, pagination, and stats. Manual API checks: search term containing SQL meta-characters should not break or return unintended rows.
 
 ### Title
 Admin delete authorization is bypassed (fixed)

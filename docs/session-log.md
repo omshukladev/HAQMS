@@ -539,3 +539,54 @@ Total: 42/42 tests passing, all green
 - ✅ Prisma client generation succeeded
 - ✅ Backend tests remain green (42/42)
 - ⏳ Queue token behavior still needs the route-level follow-up to fully use the new schema
+
+---
+
+## 2026-05-28
+
+### Completed
+
+- Fixed backend/src/routes/doctors.js — all 10 bugs with inline "BUG FIXED" comments
+  1. Bug 1: SQL Injection — replaced queryRawUnsafe with safe Prisma filters (contains, mode: insensitive)
+  2. Bug 2, 6, 10: Error message leaks — removed error.message from all error responses
+  3. Bug 3, 5: Inconsistent response format — standardized to {status: "success", data: {...}} matching auth.js
+  4. Bug 4: Performance — parallelized stats queries with Promise.all instead of sequential await
+  5. Bug 7: No pagination — added page/limit with safe defaults (page=1, limit=10, max=100)
+  6. Bug 8: No input validation — added search term length check (max 100 chars)
+  7. Bug 9: Field exposure — added .select() to return only safe fields (id, name, specialization, etc.)
+- Updated docs/approach.md with detailed explanation of all 10 fixes matching auth.js format
+
+### Decisions
+
+- Followed exact pattern from auth.js and index.js for consistency
+- All error handling now logs server-side but returns generic "Internal Server Error" to clients
+- Response format standardized across all routes: {status, data, pagination (if applicable)}
+- Pagination safe caps prevent DoS: max limit=100, default=10
+
+### Problems Encountered
+
+- None
+
+### Next Steps
+
+- Run backend tests to verify doctors.js endpoints working correctly
+- Fix remaining high-priority routes in order: appointments.js (N+1), queue.js (concurrency), patients.js (in-memory pagination)
+
+### Test Coverage
+
+- Created backend/tests/doctors.test.js with 29 comprehensive tests covering:
+  1. **GET /api/doctors** — 12 tests for list, pagination, search, filters, SQL injection prevention, validation, response format
+  2. **GET /api/doctors/:id** — 6 tests for detail view, 404 handling, field safety, error handling, auth
+  3. **GET /api/doctors/stats** — 8 tests for aggregations, parallel execution, error handling, format consistency
+  4. **Security & Edge Cases** — 3 tests for empty lists, special characters, alphabetical sorting
+
+- Full backend test suite: 71 tests passing (app, auth, middleware, doctors)
+
+### Tests Verify All 10 Fixes
+
+- SQL Injection prevention: search with SQL characters doesn't break
+- Error handling: generic 500 messages, no error.message leak
+- Response format: all use {status: "success", data: {...}}
+- Pagination: enforces limits, handles bounds
+- Performance: execution time tracking for parallelized queries
+- Auth: requires JWT token

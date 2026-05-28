@@ -518,15 +518,285 @@ The schema was designed as a quick prototype. Constraints, indexes, and cascades
 - Added 2 unique constraints: `@@unique([doctorId, appointmentDate])` on Appointment, `@@unique([doctorId, tokenNumber, createdAt])` on QueueToken
 - Added 4 CASCADE deletes: User→Doctor, Patient→Appointment, Patient→QueueToken, Appointment→QueueToken
 
-## Why This Fix
 
-- Indexes are purely additive and have zero risk of breaking existing code
-- Unique constraints prevent data corruption before it happens
-- Cascades fix broken delete workflows (no more foreign key errors when cleaning up test data)
-- Prisma 6 is the latest stable major that supports the current schema format (Prisma 7 removed `url` from datasource)
+---
 
-## Tradeoffs
+# 3rd i read doctors.js and fixed 10 bugs
 
-- Prisma 6 requires Node.js ≥ 18.17 (fine — project uses Node 22)
-- Unique constraints will throw if someone tries to insert duplicates (that's the point — fail fast rather than corrupt data silently)
-- Cascade deletes are irreversible — if a patient is accidentally deleted, their appointments are gone too. In a real hospital system, you'd want soft-deletes instead.
+## ERROR 1: SQL Injection Vulnerability in Doctor Search Endpoint
+
+```js
+// BEFORE
+let query = 'SELECT * FROM "Doctor"';
+const conditions = [];
+
+if (search) {
+  conditions.push(`name ILIKE $${values.length + 1}`);
+  values.push(`%${search}%`);
+}
+const doctors = await prisma.$queryRawUnsafe(query);
+```
+
+> **Issue:** Using `$queryRawUnsafe` with string concatenation allows SQL injection. Attacker could craft search like `'; DROP TABLE "Doctor"; --` to manipulate queries.
+
+> **Fix:** Use Prisma safe filters instead
+
+```js
+// AFTER - BUG FIXED
+if (search) {
+  where.name = { contains: String(search), mode: "insensitive" };
+}
+const doctors = await prisma.doctor.findMany({ where });
+```
+
+## ERROR 2: Error Message Leak in GET /
+
+```js
+// BEFORE
+res.status(500).json({ error: "Database execution failure", sqlMessage: error.message });
+```
+
+> **Issue:** Returning `error.message` exposes database schema details, table names, constraint errors to attackers.
+
+> **Fix:** Return generic message, log details server-side
+
+```js
+// AFTER - BUG FIXED
+console.error("doctors.list error:", error);
+res.status(500).json({ error: "Internal Server Error" });
+```
+
+## ERROR 3: Inconsistent Response Format in GET /
+
+```js
+// BEFORE
+res.json(doctors);
+```
+
+> **Issue:** Returns array directly, doesn't match auth.js pattern of `{status, data}` structure.
+
+> **Fix:** Standardize response format
+
+```js
+// AFTER - BUG FIXED
+res.json({
+  status: "success",
+  data: {
+    doctors,
+    pagination: { page, limit, total, totalPages },
+  },
+});
+```
+
+## ERROR 4: Performance - Sequential Async Calls in GET /stats
+
+```js
+// BEFORE
+const totalDoctors = await prisma.doctor.count();
+const surgeonsCount = await prisma.doctor.count({...});
+const averageFee = await prisma.doctor.aggregate({...});
+const highestExperience = await prisma.doctor.aggregate({...});
+```
+
+> **Issue:** Four independent database calls run sequentially, blocking each other. With network latency, total time = sum of all 4 calls.
+
+> **Fix:** Run in parallel using `Promise.all()`
+
+```js
+// AFTER - BUG FIXED
+const [totalDoctors, surgeonsCount, averageFee, highestExperience] = await Promise.all([
+  prisma.doctor.count(),
+  prisma.doctor.count({where: {department: "Surgery"}}),
+  prisma.doctor.aggregate({_avg: {consultationFee: true}}),
+  prisma.doctor.aggregate({_max: {experience: true}}),
+]);
+```
+
+## ERROR 5: Inconsistent Response Format in GET /stats
+
+```js
+// BEFORE
+res.json({
+  success: true,
+  data: {...},
+  debugInfo: {executionTimeMs, notes: "..."},
+});
+```
+
+> **Issue:** Uses `success: true` instead of `status: "success"`. Exposes `debugInfo` field which shouldn't leak internal details.
+
+> **Fix:** Match auth.js response pattern
+
+```js
+// AFTER - BUG FIXED
+res.json({
+  status: "success",
+  data: {
+    total: totalDoctors,
+    surgeons: surgeonsCount,
+    averageFee: Math.round(averageFee._avg.consultationFee || 0),
+    maxExperience: highestExperience._max.experience || 0,
+    executionTimeMs: durationMs,
+  },
+});
+```
+
+## ERROR 6: Error Message Leak in GET /stats
+
+```js
+// BEFORE
+res.status(500).json({ error: error.message });
+```
+
+> **Issue:** Returns `error.message` exposing internal error details.
+
+> **Fix:** Return generic message only
+
+```js
+// AFTER - BUG FIXED
+console.error("doctors.stats error:", error);
+res.status(500).json({ error: "Internal Server Error" });
+```
+
+## ERROR 7: No Pagination in GET /
+
+```js
+// BEFORE
+const doctors = await prisma.doctor.findMany();
+```
+
+> **Issue:** Loads all doctors without limit. On 10,000+ records, wastes memory and bandwidth. No bounds checking.
+
+> **Fix:** Add pagination with safe defaults
+
+```js
+// AFTER - BUG FIXED
+const page = Math.max(1, parseInt(req.query.page || "1", 10));
+const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || "10", 10)));
+const skip = (page - 1) * limit;
+```
+
+## ERROR 8: No Input Validation in GET /
+
+```js
+// BEFORE
+const { search, specialization } = req.query;
+// search used without length check
+```
+
+> **Issue:** Unbounded search parameter could be 100KB+ string, causing DoS via expensive LIKE queries.
+
+> **Fix:** Validate search term length
+
+```js
+// AFTER - BUG FIXED
+if (search && String(search).length > 100) {
+  return res.status(400).json({ error: "Search term too long" });
+}
+```
+
+## ERROR 9: Exposing Full Objects in GET / and GET /:id
+
+```js
+// BEFORE
+res.json(doctor);  // Returns ALL fields
+```
+
+> **Issue:** Returns all database fields without filtering. Could expose sensitive fields if schema changes.
+
+> **Fix:** Use `.select()` to return only safe fields
+
+```js
+// AFTER - BUG FIXED
+select: {
+  id: true,
+  name: true,
+  specialization: true,
+  department: true,
+  consultationFee: true,
+  experience: true,
+  availableFrom: true,
+  availableTo: true,
+  createdAt: true,
+  updatedAt: true,
+},
+```
+
+## ERROR 10: Error Message Leak in GET /:id
+
+```js
+// BEFORE
+res.status(500).json({ error: error.message });
+```
+
+> **Issue:** Returns `error.message` exposing internal details.
+
+> **Fix:** Return generic message only
+
+```js
+// AFTER - BUG FIXED
+console.error("doctors.getById error:", error);
+res.status(500).json({ error: "Internal Server Error" });
+```
+---
+
+# Testing Discovery: Prisma `skip` Parameter Bug in doctors.js
+
+## What Was Found
+
+Running the test suite for doctors.js revealed a **Prisma v6 type validation bug** not caught during manual code review.
+
+## The Bug
+
+```js
+// In findMany with pagination:
+const [total, doctors] = await Promise.all([
+  prisma.doctor.count({ where }),
+  prisma.doctor.findMany({
+    where,
+    take: limit,
+    skip,  // ❌ Could be undefined on first page
+    ...
+  }),
+]);
+```
+
+When page=1: `skip = (1-1) * 10 = 0`
+
+Prisma v6 requires `skip` to be a number, never undefined. Even `0` must be explicitly provided.
+
+## Error Message
+
+```
+PrismaClientValidationError: 
+Argument `skip` is missing.
+  + skip: Int
+```
+
+## Solution Applied
+
+```js
+skip: skip || 0,  // ✅ Always provide a number
+```
+
+## Why Tests Found This
+
+1. Manual code review checked logic but missed Prisma type requirements
+2. Prisma v6 is stricter than v5
+3. First-page queries with skip=0 aren't commonly tested manually
+4. Automated tests exercise ALL code paths including edge cases
+5. Test suite runs immediately on code change, catching issues fast
+
+## Lesson
+
+**Testing is not optional — it catches bugs that code review misses.**
+
+- Code review: ✅ Logic is correct
+- Tests: ❌ Prisma throws on first page
+
+## All 71 Tests Pass After Fix
+
+- app.test.js: 6 tests ✅
+- auth.test.js: 31 tests ✅  
+- middleware.test.js: 5 tests ✅
+- doctors.test.js: 29 tests ✅

@@ -10,7 +10,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | JWT verification ignores expiration | `backend/src/middleware/auth.js` | Hard | ✅ **FIXED** |
 | 2 | Sensitive credentials are logged and leaked | `backend/src/routes/auth.js` | Easy | ✅ **FIXED** |
-| 3 | Doctor search is vulnerable to SQL injection | `backend/src/routes/doctors.js` | Medium | Pending |
+| 3 | Doctor search is vulnerable to SQL injection | `backend/src/routes/doctors.js` | Medium | ✅ **FIXED** |
 | 4 | Admin delete authorization is bypassed | `backend/src/middleware/auth.js`, `backend/src/routes/patients.js` | Easy | ✅ **FIXED** |
 | 5 | Queue token generation can duplicate numbers | `backend/src/routes/queue.js`, `backend/prisma/schema.prisma` | Hard | Pending |
 | 6 | Appointments route performs N+1 queries | `backend/src/routes/appointments.js` | Medium | Pending |
