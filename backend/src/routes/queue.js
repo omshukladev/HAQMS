@@ -50,7 +50,7 @@ router.post('/checkin', authenticate, async (req, res) => {
     const maxTokenResult = await prisma.queueToken.aggregate({
       where: {
         doctorId,
-        createdAt: { gte: today },
+        queueDate: today,
       },
       _max: {
         tokenNumber: true,
@@ -69,6 +69,7 @@ router.post('/checkin', authenticate, async (req, res) => {
     const newToken = await prisma.queueToken.create({
       data: {
         tokenNumber: nextTokenNumber,
+        queueDate: today,
         patientId,
         doctorId,
         appointmentId: appointmentId || null,

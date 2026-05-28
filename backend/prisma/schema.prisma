@@ -79,7 +79,7 @@ model Appointment {
   patientId       String
   patient         Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctorId        String
-  doctor          Doctor            @relation(fields: [doctorId], references: [id])
+  doctor          Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   appointmentDate DateTime
   reason          String            @default("")
   status          AppointmentStatus @default(PENDING)
@@ -96,17 +96,18 @@ model Appointment {
 model QueueToken {
   id            String      @id @default(uuid())
   tokenNumber   Int
+  queueDate     DateTime    @default(now())
   patientId     String
   patient       Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctorId      String
-  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  doctor        Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
   appointmentId String?
   appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
   status        QueueStatus @default(WAITING)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now()) @updatedAt
 
-  @@unique([doctorId, tokenNumber, createdAt])
-  @@index([doctorId, createdAt])
+  @@unique([doctorId, queueDate, tokenNumber])
+  @@index([doctorId, queueDate])
   @@index([status])
 }

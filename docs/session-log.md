@@ -517,3 +517,25 @@ Total: 42/42 tests passing, all green
 - `backend/package.json` — Prisma 5 → 6 version bump
 - `backend/prisma/schema.prisma` — All schema improvements
 - `backend/prisma/migrations/20260528140000_add_indexes_cascades_timestamps/migration.sql` — New migration
+
+---
+
+## 2026-05-28 — Prisma Schema Review
+
+### Completed
+
+- Reviewed the latest Prisma schema update after the Prisma 6 upgrade
+- Confirmed `npx prisma generate` completed successfully with the updated schema
+- Confirmed the existing backend test suite still passes after the schema refresh
+
+### Important Note
+
+- The new schema is syntactically valid and does not break current auth/app tests
+- The new queue uniqueness design still needs the queue route to set the day bucket explicitly before it fully protects same-day token allocation
+- The migration file exists, but it has not been deployed in this step
+
+### Status
+
+- ✅ Prisma client generation succeeded
+- ✅ Backend tests remain green (42/42)
+- ⏳ Queue token behavior still needs the route-level follow-up to fully use the new schema
