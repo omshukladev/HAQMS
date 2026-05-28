@@ -486,3 +486,47 @@ Each issue was fixed with a minimal, targeted change:
 
 - `throw new Error('JWT_SECRET is required')` at module load prevents the server from starting if the env var is missing. This is intentional — it is better to fail at startup than serve with a broken auth layer.
 - The generic 401 error message ("Invalid or expired token") does not distinguish between expired and malformed tokens. This is also intentional — distinguishing them helps attackers probe the system.
+
+---
+
+# MAJOR DECISION: Prisma 6 Upgrade & Schema Improvements
+
+## Problem
+
+The Prisma schema was functional but missing basic production features:
+
+1. **No `updatedAt` timestamps** — Couldn't tell when a record was last modified
+2. **No indexes** — Every query did a full table scan. Fine at 10 rows, terrible at 10,000
+3. **No unique constraints** — Same doctor could be double-booked, duplicate queue tokens possible
+4. **No cascade deletes** — Deleting a patient or doctor threw foreign key errors
+5. **Prisma 7 breaking change** — `npx prisma` pulled Prisma 7 which removed `url` from schema config
+
+## Why It Happened
+
+The schema was designed as a quick prototype. Constraints, indexes, and cascades were deferred. Prisma 5 was fine for development but `npx prisma` in CI and some environments auto-pulled Prisma 7.
+
+## Solution
+
+**Prisma 6 upgrade:**
+- Changed `backend/package.json`: `"prisma": "^5.14.0"` → `"^6.5.0"`, `"@prisma/client": "^5.14.0"` → `"^6.5.0"`
+- Reinstalled with `npm install --prefix backend`
+- Regenerated client, verified 42/42 tests pass
+
+**Schema improvements:**
+- Added `updatedAt DateTime @default(now()) @updatedAt` to all 5 models
+- Added 6 indexes: `Appointment(doctorId, status)`, `Appointment(patientId)`, `Doctor(department)`, `Doctor(specialization)`, `QueueToken(doctorId, createdAt)`, `QueueToken(status)`
+- Added 2 unique constraints: `@@unique([doctorId, appointmentDate])` on Appointment, `@@unique([doctorId, tokenNumber, createdAt])` on QueueToken
+- Added 4 CASCADE deletes: User→Doctor, Patient→Appointment, Patient→QueueToken, Appointment→QueueToken
+
+## Why This Fix
+
+- Indexes are purely additive and have zero risk of breaking existing code
+- Unique constraints prevent data corruption before it happens
+- Cascades fix broken delete workflows (no more foreign key errors when cleaning up test data)
+- Prisma 6 is the latest stable major that supports the current schema format (Prisma 7 removed `url` from datasource)
+
+## Tradeoffs
+
+- Prisma 6 requires Node.js ≥ 18.17 (fine — project uses Node 22)
+- Unique constraints will throw if someone tries to insert duplicates (that's the point — fail fast rather than corrupt data silently)
+- Cascade deletes are irreversible — if a patient is accidentally deleted, their appointments are gone too. In a real hospital system, you'd want soft-deletes instead.

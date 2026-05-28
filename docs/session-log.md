@@ -470,3 +470,50 @@ Total: 42/42 tests passing, all green
 - `docs/todo.md` — Task completion marks
 - `docs/approach.md` — New approach entry
 - `docs/session-log.md` — This entry
+
+---
+
+## 2026-05-28 — Prisma Schema Improvements & Prisma 6 Upgrade
+
+### Completed
+
+- **Upgraded Prisma from 5 → 6** (`^5.14.0` → `^6.5.0`) — reinstall, regenerate client, all tests pass
+- **Created migration `add_indexes_cascades_timestamps`** — manually written and deployed
+- **Applied migration to both Neon and Docker PostgreSQL**
+- **Added 5 `updatedAt` columns** across all models with `@default(now())`
+- **Added 6 indexes** on frequently queried columns (doctorId+status, patientId, department, specialization, doctorId+createdAt, status)
+- **Added 2 unique constraints** to prevent double-booking and duplicate queue tokens
+- **Added 4 CASCADE deletes** (User→Doctor, Patient→Appointment, Patient→QueueToken, Appointment→QueueToken)
+
+### Schema Changes Summary
+
+| Change | Tables Affected | Purpose |
+|--------|----------------|---------|
+| `@updatedAt` | User, Doctor, Patient, Appointment, QueueToken | Track record modifications |
+| `@@index([department])` | Doctor | Faster department filtering |
+| `@@index([specialization])` | Doctor | Faster specialization search |
+| `@@index([doctorId, status])` | Appointment | Faster doctor worklist queries |
+| `@@index([patientId])` | Appointment | Faster patient lookup |
+| `@@index([doctorId, createdAt])` | QueueToken | Faster daily token aggregation |
+| `@@index([status])` | QueueToken | Faster status filtering |
+| `@@unique([doctorId, appointmentDate])` | Appointment | Prevent double-booking |
+| `@@unique([doctorId, tokenNumber, createdAt])` | QueueToken | Prevent duplicate tokens |
+| `onDelete: Cascade` | Doctor→User, Appointment→Patient, QueueToken→Patient, QueueToken→Appointment | Clean up related records on delete |
+
+### Test Results
+
+```
+✓ 3 test files passed — 42/42 tests green
+```
+
+### Major Decisions
+
+1. **Prisma 6 upgrade** — Needed to stay on a supported major version. Prisma 7 changed the datasource config entirely (removed `url` from schema), which would have required more extensive changes.
+2. **Manual migration file** — Created via `prisma migrate diff` and written to disk directly, since `prisma migrate dev` requires an interactive TTY.
+3. **Applied to both DBs** — Migration ran against Neon (production) and Docker PostgreSQL (local testing) to keep both in sync.
+
+### Files Changed
+
+- `backend/package.json` — Prisma 5 → 6 version bump
+- `backend/prisma/schema.prisma` — All schema improvements
+- `backend/prisma/migrations/20260528140000_add_indexes_cascades_timestamps/migration.sql` — New migration
