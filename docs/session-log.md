@@ -354,3 +354,119 @@ Changed `run: npm install` to `run: npm run install:all` in the CI install step.
 ### Files Changed
 
 - `.github/workflows/ci.yml` — Single-line fix: `npm install` → `npm run install:all`
+
+---
+
+## 2026-05-28 — Neon Cloud Database Setup
+
+### Completed
+
+- Created Neon project (free tier, AWS US East 1)
+- Updated `backend/.env` `DATABASE_URL` from local Docker PostgreSQL to Neon connection string
+- Ran `npx prisma migrate deploy` — migration applied successfully against Neon
+- Ran `node prisma/seed.js` — all seed data inserted (users, doctors, patients, appointments, queue tokens)
+- Stopped unused local Docker PostgreSQL: `docker stop haqms-postgres`
+
+### State
+
+- Backend now connects to Neon cloud database instead of Docker PostgreSQL
+- Old Docker URL commented out in `.env` for easy rollback
+- Local `npm run dev` talks to Neon
+
+### Files Changed
+
+- `backend/.env` — `DATABASE_URL` pointed to Neon
+
+---
+
+## 2026-05-28 — CI Workflow Fix
+
+### Completed
+
+- Updated `.github/workflows/ci.yml` to use the root npm scripts again
+- CI now installs all app dependencies through `npm run install:all`
+- CI still runs against an isolated PostgreSQL 15 service container
+- Kept Neon for deployment/local cloud dev, not for CI test execution
+
+### Why
+
+- The previous pnpm-based workflow failed because the repo is already managed with npm package-lock files
+- Using npm keeps CI aligned with the existing workspace scripts and dependency layout
+
+### Status
+
+- ✅ CI workflow aligned with repo scripts
+- ✅ Deployment DB moved to Neon
+
+---
+
+## 2026-05-28 — Auth Middleware Security Fix
+
+### Completed
+
+- Removed the hardcoded JWT secret fallback from `backend/src/middleware/auth.js`
+- Removed `ignoreExpiration: true` so expired tokens are rejected normally
+- Stopped leaking token verification error details to clients
+- Replaced the legacy admin helper with a real `authorize('ADMIN')` guard
+- Updated `backend/src/routes/patients.js` to use the shared admin authorization helper
+- Added middleware tests covering expired tokens, invalid tokens, and admin-only access
+
+### Test Results
+
+```
+✓ tests/middleware.test.js (5 tests)
+```
+
+### Files Changed
+
+- `backend/src/middleware/auth.js`
+- `backend/src/routes/patients.js`
+- `backend/tests/middleware.test.js`
+
+### Status
+
+- ✅ Middleware security fixed
+- ✅ Admin delete access now enforced
+- ✅ All backend tests passing (42/42)
+
+---
+
+## 2026-05-28 — Documentation Update: Middleware Fix Status
+
+### Completed
+
+- Updated `docs/missing-thing.md` — Marked 3 middleware-related issues as Fixed and appended "(fixed)" to titles:
+  1. "JWT verification ignores expiration (fixed)" — was already Fixed, title updated
+  2. "Admin delete authorization is bypassed (fixed)" — Pending to Fixed
+  3. "Hardcoded JWT secret in source code and env template (fixed)" — Pending to Fixed
+- Updated `docs/todo.md` — Marked 2 Phase 1 tasks as complete:
+  - [x] Fix JWT verification and remove hardcoded fallback secret
+  - [x] Enforce admin authorization on destructive routes
+- Updated `docs/approach.md` — Added middleware fix approach documentation
+- Updated `docs/session-log.md` — This entry
+
+### Middleware Fix Summary (4 items)
+
+1. **Hardcoded JWT_SECRET fallback removed** — `throw new Error('JWT_SECRET is required')` instead of fallback to `'my-super-secret-secret-key-12345!!!'`
+2. **`ignoreExpiration: true` removed** — Tokens now properly expire and are rejected by `jwt.verify()`
+3. **Error detail leak fixed** — `details: error.message` removed from token error response
+4. **Admin authorization bypass fixed** — `authorizeAdminOnlyLegacy` now delegates to `authorize('ADMIN')`
+
+### Test Results
+
+```
+✓ tests/middleware.test.js (5 tests)
+✓ tests/auth.test.js (31 tests)
+✓ tests/app.test.js (6 tests)
+Total: 42/42 tests passing, all green
+```
+
+### Files Changed
+
+- `backend/src/middleware/auth.js` — All 4 fixes
+- `backend/src/routes/patients.js` — Uses shared `authorize('ADMIN')` guard
+- `backend/tests/middleware.test.js` — 5 new middleware tests
+- `docs/missing-thing.md` — Status updates
+- `docs/todo.md` — Task completion marks
+- `docs/approach.md` — New approach entry
+- `docs/session-log.md` — This entry

@@ -1,11 +1,11 @@
 ## Phase 1 — Security Fixes
 
-- [ ] Fix JWT verification and remove hardcoded fallback secret
+- [x] Fix JWT verification and remove hardcoded fallback secret
 - [ ] Remove credential logging and sanitize auth responses
 - [ ] Remove password hash from registration response
 - [ ] Remove stack trace leakage from login error response
 - [ ] Replace raw SQL search with parameterized Prisma queries
-- [ ] Enforce admin authorization on destructive routes
+- [x] Enforce admin authorization on destructive routes
 - [ ] Restrict CORS to specific origins
 - [ ] Add rate limiting to auth endpoints
 - [ ] Add helmet security headers

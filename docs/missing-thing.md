@@ -1,5 +1,5 @@
 ### Title
-JWT verification ignores expiration
+JWT verification ignores expiration (fixed)
 
 ### Severity
 Critical
@@ -26,7 +26,7 @@ Require JWT_SECRET from env, remove ignoreExpiration, and return a generic 401 o
 Fix first because it affects every authenticated route.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Sensitive credentials are logged and leaked
@@ -56,7 +56,7 @@ Remove plaintext credential logging, return only safe user fields, and keep serv
 High priority because it leaks secrets immediately under normal usage.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Doctor search is vulnerable to SQL injection
@@ -89,7 +89,7 @@ Critical because it can expose user and medical data.
 Pending
 
 ### Title
-Admin delete authorization is bypassed
+Admin delete authorization is bypassed (fixed)
 
 ### Severity
 Critical
@@ -116,7 +116,7 @@ Enforce role checks in middleware and use the shared authorize('ADMIN') guard on
 Critical because it breaks access control on destructive actions.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Queue token generation can duplicate numbers
@@ -419,7 +419,7 @@ Critical because password hashes are leaked on every registration call.
 Pending
 
 ### Title
-Hardcoded JWT secret in source code and env template
+Hardcoded JWT secret in source code and env template (fixed)
 
 ### Severity
 High
@@ -446,7 +446,7 @@ Remove the hardcoded fallback and crash at startup if JWT_SECRET is not set in t
 High because combined with the ignoreExpiration bug, it eliminates all JWT security.
 
 ### Status
-Pending
+Fixed
 
 ### Title
 Login endpoint leaks error stack traces to client

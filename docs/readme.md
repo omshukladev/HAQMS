@@ -84,6 +84,13 @@ All accounts use password: `password123`
 | DOCTOR | doctor2@haqms.com (Dr. Meredith Grey) |
 | DOCTOR | doctor3@haqms.com (Dr. John Carter) |
 
+### Deployment
+
+- For cloud deployment, use a Neon PostgreSQL connection string in `backend/.env`
+- Apply Prisma migrations before starting the backend
+- Keep CI on an isolated test database; do not point CI at production Neon
+- If needed, keep the local Docker PostgreSQL URL commented in `.env` for rollback
+
 ## API Endpoints
 
 | Method | Path | Auth | Description |

@@ -366,3 +366,123 @@ res.status(201).json({
 - ✅ Error stack traces never exposed to client
 - ✅ Database errors never exposed to client
 - ✅ JWT_SECRET uses environment (no hardcoded fallback)
+
+---
+
+## ERROR 12: JWT Verification Ignores Expiration and Admin Bypass in Middleware
+
+```js
+const JWT_SECRET = process.env.JWT_SECRET || 'my-super-secret-secret-key-12345!!!';
+const decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true });
+```
+
+> **Issue:** Expired tokens were still accepted, and the middleware used a hardcoded fallback secret. That made old or forged tokens valid. The legacy admin helper also skipped role checks, so any authenticated user could perform admin actions.
+
+> **Fix:** Require `JWT_SECRET`, remove `ignoreExpiration`, return a generic token error, and enforce `authorize('ADMIN')` on protected admin routes.
+
+```js
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required');
+}
+
+const decoded = jwt.verify(token, JWT_SECRET);
+```
+
+> **Why This Fix:** Tokens now expire normally, the app no longer falls back to a weak secret, and admin-only actions are protected by a real role check. This closes both authentication and authorization bypasses at the middleware layer.
+
+> **Status:** ✅ FIXED & TESTED (5 middleware tests passing, 42/42 backend tests passing)
+
+
+---
+
+# MAJOR DECISION TAKEN: ADDED NEON DB
+
+## Problem
+
+The app was still tied to a local PostgreSQL workflow, which is fine for development but awkward for cloud deployment.
+
+## Why It Happened
+
+The original setup assumed Docker or local Postgres only, so deployment needed a managed database provider.
+
+## Solution
+
+- Switched `backend/.env` to a Neon Postgres connection string
+- Ran Prisma migrations against Neon
+- Seeded Neon with the existing seed data
+
+## Why This Fix
+
+Neon gives a managed PostgreSQL database that works cleanly for cloud deployment and removes the need to run local Docker DB in production.
+
+## Tradeoffs
+
+- CI still uses a disposable Postgres service for tests
+- Local development now depends on Neon unless the old Docker URL is restored
+- Network access is required for local dev if Neon is used
+
+---
+
+# Middleware Auth Security Fix
+
+## Problem
+
+The middleware layer had four distinct security issues:
+
+1. **Hardcoded JWT secret fallback** — `backend/src/middleware/auth.js` line 3 used `process.env.JWT_SECRET || 'my-super-secret-secret-key-12345!!!'`. Anyone with source code access could forge valid JWTs for any user role.
+2. **Token expiration bypassed** — `jwt.verify(token, JWT_SECRET, { ignoreExpiration: true })` at line 28 accepted expired tokens as valid. A stolen token remained usable indefinitely.
+3. **Error detail leak** — The catch block returned `{ error: 'Invalid token', details: error.message }`, leaking the specific reason (e.g., "jwt expired") and JWT library internals to attackers.
+4. **Admin authorization bypass** — `authorizeAdminOnlyLegacy` had the role check commented out, making it a no-op. Any authenticated user (including PATIENT role) could call admin-only routes like DELETE /api/patients/:id.
+
+## Why It Happened
+
+All four issues stem from junior development patterns and a lack of security review:
+
+- The hardcoded fallback was a "convenience" for local development that was never removed from production code.
+- `ignoreExpiration: true` was likely added to silence errors during testing and left in without understanding the security implications.
+- Including `details: error.message` in error responses is a common debugging habit that exposes internals.
+- `authorizeAdminOnlyLegacy` was probably stubbed as a placeholder and never actually implemented, but the route was still wired to use it.
+
+## Solution
+
+Each issue was fixed with a minimal, targeted change:
+
+1. **JWT secret fallback removed:**
+   ```js
+   const JWT_SECRET = process.env.JWT_SECRET;
+   if (!JWT_SECRET) {
+     throw new Error('JWT_SECRET is required');
+   }
+   ```
+   The app now crashes at module load if `JWT_SECRET` is not set, rather than silently falling back to a weak default.
+
+2. **`ignoreExpiration: true` removed:**
+   ```js
+   const decoded = jwt.verify(token, JWT_SECRET);
+   ```
+   Tokens now expire at their `exp` claim. `jwt.verify` throws a `TokenExpiredError` for expired tokens and `JsonWebTokenError` for invalid ones.
+
+3. **Error detail leak closed:**
+   ```js
+   return res.status(401).json({ error: 'Invalid or expired token' });
+   ```
+   A single generic message is returned regardless of the specific failure reason. The full error is logged server-side.
+
+4. **Admin authorization fixed:**
+   ```js
+   const authorizeAdminOnlyLegacy = authorize('ADMIN');
+   ```
+   The legacy helper now delegates to the existing `authorize('ADMIN')` middleware instead of being a no-op. The `patients.js` route using it automatically inherits the correct enforcement.
+
+## Why This Fix
+
+- **Fail-fast** — Removing the fallback makes the deployment surface misconfiguration immediately rather than hiding it behind an insecure default.
+- **Minimal diff** — Each fix is a single-line change (or removal). No restructuring of the middleware layer was needed.
+- **Defense in depth** — All four fixes close independent attack vectors. Even if one layer is compromised, the others still protect.
+- **No regressions** — The 5 middleware tests (expired token, invalid token, missing token, admin-only route, patient-role denied) plus the existing 37 backend tests all pass at 42/42.
+
+## Tradeoffs
+
+- `throw new Error('JWT_SECRET is required')` at module load prevents the server from starting if the env var is missing. This is intentional — it is better to fail at startup than serve with a broken auth layer.
+- The generic 401 error message ("Invalid or expired token") does not distinguish between expired and malformed tokens. This is also intentional — distinguishing them helps attackers probe the system.
