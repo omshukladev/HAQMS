@@ -1,127 +1,245 @@
 # Frontend Errors & Issues
 
-All discovered issues across frontend source files.
+All discovered frontend issues organized by the internship evaluation challenges.
 
 ---
 
-## Critical (crashes / memory leaks)
+## Challenge 4: Frontend Memory & React Optimization
 
-### 1. Missing `Link` Import
-
-- **File:** `frontend/src/app/dashboard/page.js:903`
-- **Problem:** `<Link>` component used but never imported from `next/link`. Clicking "View Diagnostic Reports" throws a runtime error.
-- **Impact:** Doctor workflow broken when trying to view patient history.
-
-### 2. Null `medicalHistory` Crash
-
+### CRASH-1: Null `medicalHistory` Crash
+- **Severity:** Critical
 - **File:** `frontend/src/app/dashboard/page.js:897`
-- **Problem:** `selectedPatientHistory.medicalHistory.toUpperCase()` crashes when `medicalHistory` is `null`. Seed data includes patients with `medicalHistory: null` (Bruce Wayne, Clark Kent, Diana Prince).
-- **Impact:** Clicking any patient without medical history crashes the entire dashboard render.
+- **Problem:** `selectedPatientHistory.medicalHistory.toUpperCase()` crashes when `medicalHistory` is null. Seed data includes patients without medical history (Bruce Wayne, Clark Kent, Diana Prince).
+- **Fix:** Use optional chaining: `selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history'`
+- **Status:** Pending
 
-### 3. Queue Polling Memory Leak
+### CRASH-2: Missing `Link` Import
+- **Severity:** Critical
+- **File:** `frontend/src/app/dashboard/page.js:903`
+- **Problem:** `<Link href={...}>` used but not imported from `next/link`. Throws `ReferenceError: Link is not defined`.
+- **Fix:** Add `import Link from 'next/link'` at top of file
+- **Status:** Pending
 
-- **File:** `frontend/src/app/queue/page.js:47-54`
-- **Problem:** `setInterval` has no cleanup function. `useEffect` does not return `() => clearInterval(intervalId)`. Each navigation to queue spawns a new interval.
-- **Impact:** Accumulating parallel API calls, state updates on unmounted components, browser memory bloat.
+### LEAK-1: Queue Polling Memory Leak
+- **Severity:** Critical
+- **File:** `frontend/src/app/queue/page.js:41-55`
+- **Problem:** `setInterval` in `useEffect` has no cleanup function. Each mount spawns a new interval that runs forever. After 10 navigations to /queue, 10 intervals poll the server simultaneously.
+- **Fix:** Return cleanup function: `return () => clearInterval(intervalId)`
+- **Status:** Pending
 
----
+### PERF-1: No Debounce on Patient Search
+- **Severity:** High
+- **File:** `frontend/src/app/dashboard/page.js:99-103`
+- **Problem:** `useEffect` fires `fetchPatients()` on every keystroke with no debounce. Typing "Alice" triggers 5 separate API calls.
+- **Fix:** Add 300ms debounce using `setTimeout` + `clearTimeout` or a debounce hook
+- **Status:** Pending
 
-## High (broken UX / security)
-
-### 4. DOM Anti-Pattern in React
-
-- **File:** `frontend/src/app/dashboard/page.js:776-777`
-- **Problem:** Uses `document.getElementById('walkin-patient').value` and `document.getElementById('walkin-doctor').value` instead of React state.
-- **Impact:** Breaks React's virtual DOM consistency, harder to test and maintain.
-
-### 5. Undefined Doctor Crash Risk
-
-- **File:** `frontend/src/app/dashboard/page.js:505`
-- **Problem:** Quick check-in button uses `doctorsList[0]?.id` which evaluates to `undefined` if `doctorsList` hasn't loaded yet.
-- **Impact:** Silent failure / broken check-in flow.
-
-### 6. Missing AbortController on All Fetches
-
+### PERF-2: Missing AbortController on All Fetches
+- **Severity:** High
 - **File:** `frontend/src/app/dashboard/page.js` (all fetch calls)
-- **Problem:** None of the ~15 fetch calls use AbortController. If the component unmounts mid-request, React throws state update warnings.
-- **Impact:** Memory leaks, console warnings, potential race conditions.
+- **Problem:** No `AbortController` on any of ~15 fetch calls. If component unmounts mid-request, React throws state-update-on-unmounted warnings.
+- **Fix:** Pass `signal: abortController.signal` to each fetch, abort in useEffect cleanup
+- **Status:** Pending
 
-### 7. Hardcoded API URL in Queue Page
+### DOM-1: DOM Anti-Pattern in React
+- **Severity:** High
+- **File:** `frontend/src/app/dashboard/page.js:776-777`
+- **Problem:** Uses `document.getElementById('walkin-patient').value` and `document.getElementById('walkin-doctor').value` instead of React controlled inputs.
+- **Fix:** Replace with React state (`useState`) and `onChange` handlers
+- **Status:** Pending
 
-- **File:** `frontend/src/app/queue/page.js:16`
-- **Problem:** `const API_BASE_URL = 'http://localhost:5000/api'` hardcoded. Duplicated from AuthContext.
-- **Impact:** Breaks on deployment when backend URL differs.
+### DOM-2: Undefined Doctor Crash Risk
+- **Severity:** High
+- **File:** `frontend/src/app/dashboard/page.js:505`
+- **Problem:** Quick check-in uses `doctorsList[0]?.id` which is `undefined` if `doctorsList` hasn't loaded yet.
+- **Fix:** Add guard: disable button until `doctorsList.length > 0`
+- **Status:** Pending
 
-### 8. Hardcoded API URL in AuthContext
+### STALE-1: Stale Closure on refreshCount
+- **Severity:** Low
+- **File:** `frontend/src/app/queue/page.js:48`
+- **Problem:** `refreshCount` captured in stale closure — console log always shows initial value + 1.
+- **Fix:** Remove the log or use `useRef` for the current count
+- **Status:** Pending
 
-- **File:** `frontend/src/context/AuthContext.js:18`
-- **Problem:** `const API_BASE_URL = 'http://localhost:5000/api'` hardcoded. Should use `process.env.NEXT_PUBLIC_API_URL`.
-- **Impact:** Must be changed before deployment.
-
-### 9. JWT Stored in localStorage
-
-- **File:** `frontend/src/context/AuthContext.js:59-61`
-- **Problem:** Token and user data stored in `localStorage`. Vulnerable to XSS attacks.
-- **Impact:** Token theft via script injection.
+### STALE-2: Duplicate Doctors Fetch
+- **Severity:** Medium
+- **File:** `frontend/src/app/dashboard/page.js:106-120`
+- **Problem:** `fetchDoctorsDropdown` and `searchPhysiciansAdmin` both populate `doctorsList`. Two sources of truth cause race conditions.
+- **Fix:** Single source of truth for doctors list
+- **Status:** Pending
 
 ---
 
-## Medium (inconsistent UX / missing features)
+## Challenge 5: Incomplete Feature Delivery
 
-### 10. No Loading State on Submit Buttons
+### FEAT-1: Missing Patient History Records Page
+- **Severity:** Critical (required feature)
+- **File:** Does not exist — `frontend/src/app/patients/[id]/history-records/page.js`
+- **Problem:** Clicking "View Diagnostic Reports Details (Legacy App)" on a patient navigates to 404. Must build this page.
+- **Fix:** Create the page to fetch and render patient's appointments, diagnoses, and medical history
+- **Status:** Pending
 
+### FEAT-2: Missing Patient Detail Page
+- **Severity:** Medium
+- **File:** Does not exist — `frontend/src/app/patients/[id]/page.js`
+- **Problem:** No dedicated patient detail page exists. All patient info only accessible via dashboard modal.
+- **Fix:** Create patient detail page with full profile, appointments list, and queue history
+- **Status:** Pending
+
+---
+
+## Security Issues
+
+### SEC-1: JWT Stored in localStorage (XSS Risk)
+- **Severity:** High
+- **File:** `frontend/src/context/AuthContext.js:59-61`
+- **Problem:** Token and user PII stored in `localStorage`. Any injected script can exfiltrate the token.
+- **Fix:** Use httpOnly cookies for auth token (requires backend change). At minimum, document this as a known risk.
+- **Status:** Pending
+
+### SEC-2: Hardcoded Credentials in Login Page
+- **Severity:** High
+- **File:** `frontend/src/app/login/page.js:131-153`
+- **Problem:** Demo credentials (`admin@haqms.com` / `password123`, etc.) visible in DOM source.
+- **Fix:** Hide behind toggle or remove in production build
+- **Status:** Pending
+
+### SEC-3: Delete Patient — No Client-Side Role Guard
+- **Severity:** Medium
+- **File:** `frontend/src/app/dashboard/page.js:511-518`
+- **Problem:** Delete button rendered for all roles (DOCTOR, RECEPTIONIST can attempt deletion). Backend enforces ADMIN but no UI feedback for denied requests.
+- **Fix:** Only render delete button if `user.role === 'ADMIN'`
+- **Status:** Pending
+
+### SEC-4: No Auto-Logout on 401
+- **Severity:** High
+- **File:** `frontend/src/context/AuthContext.js`
+- **Problem:** When JWT expires, API returns 401 but frontend doesn't intercept to redirect to login. User sees broken UI with no clear cause.
+- **Fix:** Wrap fetch calls or add global 401 interceptor to clear token and redirect to /login
+- **Status:** Pending
+
+---
+
+## Hardcoded URLs
+
+### URL-1: Hardcoded API URL in AuthContext
+- **Severity:** Medium
+- **File:** `frontend/src/context/AuthContext.js:18`
+- **Problem:** `const API_BASE_URL = 'http://localhost:5000/api'` hardcoded.
+- **Fix:** Use `process.env.NEXT_PUBLIC_API_URL`
+- **Status:** Pending
+
+### URL-2: Duplicate Hardcoded URL in Queue Page
+- **Severity:** Medium
+- **File:** `frontend/src/app/queue/page.js:16`
+- **Problem:** Same URL duplicated independently from AuthContext.
+- **Fix:** Use `useAuth()` context or `process.env.NEXT_PUBLIC_API_URL`
+- **Status:** Pending
+
+---
+
+## UX & Validation Issues
+
+### UX-1: No Loading/Disabled State on Submit Buttons
+- **Severity:** Medium
 - **File:** `frontend/src/app/dashboard/page.js:638-643` (register), `722-727` (book)
 - **Problem:** Submit buttons have no `disabled` state while request is in flight. Double-click creates duplicate records.
-- **Impact:** Duplicate patient registrations and appointment bookings.
+- **Fix:** Add `isSubmitting` state, disable button while true
+- **Status:** Pending
 
-### 11. No Client-Side Password Length Check
+### UX-2: No Password Validation on Login
+- **Severity:** Low
+- **File:** `frontend/src/app/login/page.js:26-38`
+- **Problem:** Password field has no client-side presence/length check. Backend rejects it with delayed error.
+- **Fix:** Add `password.length < 6` check with instant error message
+- **Status:** Pending
 
-- **File:** `frontend/src/app/login/page.js:37`
-- **Problem:** Backend requires password >= 6 characters, but frontend submits without checking.
-- **Impact:** User gets delayed server error instead of instant feedback.
+### UX-3: Email Input Uses `type="text"`
+- **Severity:** Low
+- **File:** `frontend/src/app/login/page.js:81`
+- **Problem:** Email input uses `type="text"` instead of `type="email"`, disabling native validation and mobile email keyboard.
+- **Fix:** Change to `type="email"` or keep `type="text"` with proper custom validation
+- **Status:** Pending
 
-### 12. Email Input Uses `type="text"`
-
-- **File:** `frontend/src/app/login/page.js:83`
-- **Problem:** Email input uses `type="text"` instead of `type="email"`. Disables native validation and mobile keyboard.
-- **Impact:** Reduced UX quality.
-
-### 13. No Debounce on Patient Search
-
-- **File:** `frontend/src/app/dashboard/page.js:99-103`
-- **Problem:** `useEffect` triggers `fetchPatients` on every keystroke. No debounce or throttle.
-- **Impact:** Excessive API calls, unnecessary backend load.
-
-### 14. No Error Boundary
-
+### UX-4: No Error Boundary
+- **Severity:** High
 - **File:** `frontend/src/app/layout.js`
-- **Problem:** No React error boundary wrapping the app. Any render crash shows white screen.
-- **Impact:** Complete UI failure on unhandled render errors.
-
-### 15. No Auto-Logout on 401
-
-- **File:** `frontend/src/context/AuthContext.js`
-- **Problem:** When JWT expires, API returns 401 but frontend doesn't intercept to redirect to login.
-- **Impact:** Silent failure on expired sessions.
+- **Problem:** No React error boundary. Any unhandled render error shows white screen.
+- **Fix:** Add error boundary component wrapping children
+- **Status:** Pending
 
 ---
 
-## Low (code quality / cleanup)
+## Code Quality
 
-### 16. Stale Closure on refreshCount
+### CODE-1: Unused Import (`CalendarDays`)
+- **Severity:** Low
+- **File:** `frontend/src/app/page.js:4`
+- **Problem:** `CalendarDays` imported from lucide-react but never used.
+- **Fix:** Remove from import
+- **Status:** Pending
 
-- **File:** `frontend/src/app/queue/page.js:48`
-- **Problem:** `setInterval` callback references `refreshCount` but dependency array is `[]`. Count is always 0 inside callback.
-- **Impact:** Console log shows incorrect poll count (cosmetic).
+### CODE-2: `'use client'` on Static Page
+- **Severity:** Low
+- **File:** `frontend/src/app/page.js:1`
+- **Problem:** Landing page marked `'use client'` but has no interactivity. Prevents SSR.
+- **Fix:** Remove `'use client'` directive
+- **Status:** Pending
 
-### 17. Duplicate Doctors Fetch
+### CODE-3: `register` Function — Dead Code
+- **Severity:** Low
+- **File:** `frontend/src/context/AuthContext.js:77-105`
+- **Problem:** `register` function defined and exported but never called by any component.
+- **Fix:** Either use it (build registration page) or remove it
+- **Status:** Pending
 
-- **File:** `frontend/src/app/dashboard/page.js:106-120`
-- **Problem:** `fetchDoctorsDropdown` called on mount and also via `searchPhysiciansAdmin`. Two sources of truth for `doctorsList`.
-- **Impact:** Race conditions, stale data.
+### CODE-4: Redundant Font Preconnect
+- **Severity:** Low
+- **File:** `frontend/src/app/layout.js:19-21`
+- **Problem:** Google Fonts preconnect links are redundant when using `next/font/google` (Inter).
+- **Fix:** Remove preconnect links
+- **Status:** Pending
 
-### 18. No Frontend Tests
+### CODE-5: No Frontend Tests
+- **Severity:** Medium
+- **File:** `frontend/` (no test files at all)
+- **Problem:** Zero test coverage for any frontend component.
+- **Fix:** Add Vitest + React Testing Library for critical components
+- **Status:** Pending
 
-- **File:** `frontend/` (no test files)
-- **Problem:** No test infrastructure (Vitest/Jest config, test files) for any frontend component.
-- **Impact:** No regression protection for frontend fixes.
+---
+
+## Summary Count
+
+| Category | Count |
+|----------|-------|
+| **Critical (crash / leak)** | 3 |
+| **High** | 8 |
+| **Medium** | 7 |
+| **Low** | 7 |
+| **Total** | **25** |
+
+## Priority Fix Order
+
+1. CRASH-1: Null medicalHistory crash
+2. CRASH-2: Missing Link import
+3. LEAK-1: Queue polling memory leak
+4. SEC-1: JWT in localStorage
+5. FEAT-1: Build patient history-records page
+6. PERF-1: Debounce patient search
+7. DOM-1: Replace DOM anti-pattern with React state
+8. DOM-2: Guard undefined doctor
+9. SEC-4: Auto-logout on 401
+10. SEC-3: Client-side role guard on delete
+11. UX-4: Error boundary
+12. UX-1: Loading states on submit buttons
+13. PERF-2: AbortController on fetches
+14. URL-1 & URL-2: env-based API URL
+15. SEC-2: Hide hardcoded credentials
+16. STALE-2: Deduplicate doctors fetch
+17. UX-2: Password validation on login
+18. UX-3: Email input type
+19. FEAT-2: Patient detail page
+20. STALE-1: Stale closure refreshCount
+21. CODE-1-5: Cleanup items
