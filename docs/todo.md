@@ -1,15 +1,15 @@
 ## Phase 1 — Security Fixes
 
 - [x] Fix JWT verification and remove hardcoded fallback secret
-- [ ] Remove credential logging and sanitize auth responses
-- [ ] Remove password hash from registration response
-- [ ] Remove stack trace leakage from login error response
-- [ ] Replace raw SQL search with parameterized Prisma queries
+- [x] Remove credential logging and sanitize auth responses
+- [x] Remove password hash from registration response
+- [x] Remove stack trace leakage from login error response
+- [x] Replace raw SQL search with parameterized Prisma queries
 - [x] Enforce admin authorization on destructive routes
-- [ ] Restrict CORS to specific origins
+- [x] Restrict CORS to specific origins
 - [ ] Add rate limiting to auth endpoints
 - [ ] Add helmet security headers
-- [ ] Remove sqlMessage from doctor search error responses
+- [x] Remove sqlMessage from doctor search error responses
 
 ## Phase 2 — Frontend Crash Fixes
 
@@ -26,13 +26,13 @@
 - [x] Add indexes for common filters and joins
 - [x] Add CASCADE delete handling on relations
 - [x] Add @updatedAt timestamps to models
-- [ ] Validate appointment status transitions (PATCH)
+- [x] Validate appointment status transitions (PATCH)
 - [x] Validate queue status transitions (PATCH)
 
 ## Phase 4 — Backend Performance
 
-- [ ] Eliminate N+1 queries in appointments
-- [ ] Parallelize doctor stats queries
+- [x] Eliminate N+1 queries in appointments
+- [x] Parallelize doctor stats queries
 - [ ] Rewrite nested report aggregation efficiently
 - [ ] Move patient pagination and filtering into the database
 

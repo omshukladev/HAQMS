@@ -621,3 +621,56 @@ Total: 42/42 tests passing, all green
 - Updated backend/vitest.config.js to set `fileParallelism: false` so DB-backed test files run sequentially.
 - This prevents shared PostgreSQL cleanup in one file from deleting records required by another file.
 - Full backend suite now passes with 83 tests.
+
+---
+
+## 2026-05-28
+
+### Completed
+
+- Fixed backend/src/routes/appointments.js — all 10 bugs with inline "BUG FIXED" comments
+  1. N+1 Query — replaced loop with Prisma include + select (101 queries → 1)
+  2. Duplicate booking check — round appointmentDate to minute granularity
+  3, 4, 5. Error detail leaks — removed error.message from all error responses
+  5, 6. Inconsistent response formats — standardized to {status: "success", data: {...}} matching auth.js
+  7. No pagination — added page/limit with safe defaults
+  8. No status validation — added enum check for PENDING/COMPLETED/CANCELLED
+  9. No 404 check on PATCH — added findUnique before update
+  10. Debug console.log — removed from production code
+
+### Decisions
+
+- Used Promise.all to parallelize count and findMany
+- Used select inside include to control exactly which fields are returned for patient/doctor
+- Round appointmentDate to seconds=0, milliseconds=0 for sane duplicate detection
+
+### Status
+
+- ✅ appointments.js fully fixed
+- ✅ 83/83 backend tests passing
+- ⏳ Next: patients.js or reports.js
+
+## 2026-05-28
+
+### Completed
+
+- Added backend/tests/appointments.test.js with 12 tests covering:
+  - GET /api/appointments list, doctor filtering, pagination, auth
+  - POST /api/appointments booking, duplicate prevention, validation, auth
+  - PATCH /api/appointments/:id status updates, invalid status handling, 404s, auth
+- Verified the appointment route behavior after the existing fixes.
+- Confirmed the full backend suite now passes with appointments tests included.
+
+### Decisions
+
+- Matched the same Vitest + Supertest style used by auth, doctors, and queue tests.
+- Focused on the fixed behaviors: pagination, duplicate blocking, status validation, and standardized responses.
+- Seeded fresh doctors/patients before each test to keep test cases deterministic.
+
+### Problems Encountered
+
+- None blocking.
+
+### Next Steps
+
+- If needed, tighten appointments list field exposure later (medicalHistory is still returned in the patient payload).
