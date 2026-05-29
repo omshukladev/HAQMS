@@ -22,11 +22,15 @@ app.use(helmet());
 // Enable CORS for all origins
 // FIX: In production, this should be restricted to specific origins to prevent unauthorized access. Allowing all origins can lead to security vulnerabilities such as Cross-Site Request Forgery (CSRF) and data leaks.
 
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map(s => s.trim())
+  : ["http://localhost:3000"];
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: corsOrigins,
     methods: ["GET", "POST", "PATCH", "DELETE"],
-    credentials: true, // if you switch to cookie-based auth later
+    credentials: true,
   }),
 );
 // Body parser
