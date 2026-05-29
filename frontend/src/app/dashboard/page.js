@@ -487,8 +487,8 @@ export default function Dashboard() {
                                 {p.name}
                                 {p.email && <span className="block text-xxs text-gray-400 font-normal mt-0.5">{p.email}</span>}
                               </td>
-                              <td className="py-3.5 text-gray-500 dark:text-gray-400 font-medium">{p.phoneNumber}</td>
-                              <td className="py-3.5 text-gray-500 dark:text-gray-400">
+                              <td className="py-3.5 text-gray-700 dark:text-gray-300 font-medium">{p.phoneNumber}</td>
+                              <td className="py-3.5 text-gray-700 dark:text-gray-300">
                                 {p.age} yrs / <span className="capitalize">{p.gender}</span>
                               </td>
                               <td className="py-3.5 text-right space-x-2">
@@ -823,7 +823,7 @@ export default function Dashboard() {
                             </button>
                             <span className="block text-xxs text-gray-400 mt-0.5">Age: {app.patient?.age}</span>
                           </td>
-                          <td className="py-3.5 text-gray-500 dark:text-gray-400 font-semibold">{app.reason || 'None provided'}</td>
+                          <td className="py-3.5 text-gray-700 dark:text-gray-300 font-semibold">{app.reason || 'None provided'}</td>
                           <td className="py-3.5">
                             <span className={`inline-flex px-2 py-0.5 rounded text-xxs font-extrabold tracking-wide uppercase ${app.status === 'COMPLETED' ? 'bg-teal-500/10 text-teal-600' : app.status === 'CANCELLED' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'}`}>
                               {app.status}
@@ -981,7 +981,7 @@ export default function Dashboard() {
                     <TrendingUp className="h-5 w-5 text-teal-600" />
                     Doctor Revenue & Operations Report
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-1">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold mt-1">
                     System-wide practitioner performance audits. Computes completed bookings and potential sales.
                   </p>
                 </div>
@@ -1050,8 +1050,8 @@ export default function Dashboard() {
                               {item.name}
                               <span className="block text-xxs text-teal-600 dark:text-teal-400 font-semibold uppercase mt-0.5">{item.specialization}</span>
                             </td>
-                            <td className="py-3.5 text-gray-500 dark:text-gray-400">{item.department}</td>
-                            <td className="py-3.5 text-center text-gray-500 dark:text-gray-400">
+                            <td className="py-3.5 text-gray-700 dark:text-gray-300">{item.department}</td>
+                            <td className="py-3.5 text-center text-gray-700 dark:text-gray-300">
                               {item.completedAppointments} Completed / {item.totalAppointments} Total
                             </td>
                             <td className="py-3.5 text-center font-bold text-gray-800 dark:text-gray-200">{item.todayQueueSize} in queue</td>
@@ -1077,7 +1077,7 @@ export default function Dashboard() {
                 <Award className="h-5 w-5 text-teal-600" />
                 Staff Physicians Registry Lookup
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-1">
+              <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold mt-1">
                 Database lookup for credentials. Uses a raw SQL interpolation backend query.
               </p>
             </div>
@@ -1126,9 +1126,9 @@ export default function Dashboard() {
                       {doc.department}
                     </span>
                     <h4 className="font-extrabold text-gray-800 dark:text-gray-100">{doc.name}</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">{doc.specialization}</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{doc.specialization}</p>
                   </div>
-                  <div className="mt-6 pt-3 border-t border-gray-200 dark:border-gray-800/80 flex justify-between items-center text-xs font-semibold text-gray-500">
+                  <div className="mt-6 pt-3 border-t border-gray-200 dark:border-gray-800/80 flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300">
                     <span>Exp: {doc.experience} yrs</span>
                     <span className="font-bold text-teal-600 dark:text-teal-400">Fee: ${doc.consultationFee}</span>
                   </div>
