@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const dotenv = require("dotenv");
 
 // Load environment variables
@@ -15,7 +16,10 @@ const reportRoutes = require("./routes/reports");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for all origins 
+// Security headers
+app.use(helmet());
+
+// Enable CORS for all origins
 // FIX: In production, this should be restricted to specific origins to prevent unauthorized access. Allowing all origins can lead to security vulnerabilities such as Cross-Site Request Forgery (CSRF) and data leaks.
 
 app.use(

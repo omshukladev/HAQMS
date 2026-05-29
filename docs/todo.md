@@ -7,8 +7,8 @@
 - [x] Replace raw SQL search with parameterized Prisma queries
 - [x] Enforce admin authorization on destructive routes
 - [x] Restrict CORS to specific origins
-- [ ] Add rate limiting to auth endpoints
-- [ ] Add helmet security headers
+- [x] Add rate limiting to auth endpoints
+- [x] Add helmet security headers
 - [x] Remove sqlMessage from doctor search error responses
 
 ## Phase 2 — Frontend Crash Fixes
@@ -18,7 +18,7 @@
 - [x] Guard nullable medical history rendering
 - [x] Guard doctor check-in against undefined matchedDoc
 - [x] Fix queue polling interval cleanup
-- [ ] Fix stale closure on refreshCount
+- [x] Fix stale closure on refreshCount
 
 ## Phase 3 — Data Integrity and Concurrency
 
@@ -54,22 +54,22 @@
 - [x] Fix ESLint React 19 warnings (state initializers, comment placement)
 - [x] Create .env file with NEXT_PUBLIC_API_URL
 - [x] Guard doctor check-in against undefined matchedDoc
-- [ ] Implement the missing patient history route
-- [ ] Add AbortController to fetch calls in dashboard
-- [ ] Convert DOM getElementById refs to React state
-- [ ] Add loading/disabled state to submit buttons
-- [ ] Improve dashboard search and fetch behavior
+- [x] Implement the missing patient history route
+- [x] Add AbortController to fetch calls in dashboard
+- [x] Convert DOM getElementById refs to React state
+- [x] Add loading/disabled state to submit buttons
+- [x] Improve dashboard search and fetch behavior
 
 ## Phase 7 — Input Validation
 
 - [x] Add backend validation for phone number format
 - [x] Add backend validation for age range bounds
 - [x] Add backend validation for email format
-- [ ] Add frontend validation parity
+- [x] Add frontend validation parity
 
 ## Phase 8 — Cleanup and Documentation
 
-- [ ] Remove unused icon imports in Dashboard
+- [x] Remove unused icon imports in Dashboard
 - [ ] Fix availableFrom/availableTo to use proper time type
 - [ ] Update README docs with confirmed setup notes
 - [ ] Record implementation approaches for each fix

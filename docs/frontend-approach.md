@@ -506,3 +506,239 @@ Professional color system:
 ### How to Test
 
 Open app in light mode — all screens polished. Dark mode still works. Hover interactions show smooth transitions.
+
+---
+
+## FIX 14: Stale Closure on refreshCount (STALE-1)
+
+**File:** `frontend/src/app/queue/page.js:49-53`
+
+### Before
+
+```js
+const intervalId = setInterval(() => {
+  console.log(`[POLL] Active Queue Poll #${refreshCount + 1} firing...`);
+  fetchQueueData();
+  setRefreshCount((prev) => prev + 1);
+}, 3000);
+```
+
+`refreshCount` was captured in the closure at initial render (0), so the log always showed `#1` even after 50 polls.
+
+### After
+
+```js
+const intervalId = setInterval(() => {
+  fetchQueueData();
+  setRefreshCount((prev) => {
+    console.log(`[POLL] Active Queue Poll #${prev + 1} firing...`);
+    return prev + 1;
+  });
+}, 3000);
+```
+
+Moved the log inside the functional state updater `(prev) => { ... }` which always receives the latest value.
+
+---
+
+## FIX 15: Loading/Disabled States on Submit Buttons (UX-1)
+
+**Files:** `frontend/src/app/dashboard/page.js` — register, book appointment, check-in buttons
+
+### Before
+
+All submit buttons had no `disabled` state during request. Double-clicking created duplicate records — two patients registered, two appointments booked, two queue check-ins.
+
+### After
+
+Added `regSubmitting`, `bookingSubmitting`, `checkinSubmitting` state booleans. Each button is disabled during its async operation:
+
+```jsx
+<button type="submit" disabled={regSubmitting} className="...disabled:opacity-50 disabled:cursor-not-allowed">
+  {regSubmitting ? 'Registering...' : 'Register Patient Record'}
+</button>
+```
+
+Each handler guards with `if (submittingState) return;`, sets `true` before fetch, and resets in `finally { setSubmitting(false); }`.
+
+---
+
+## FIX 16: Login Form Validation (UX-2, UX-3)
+
+**File:** `frontend/src/app/login/page.js`
+
+### Changes
+
+- **Email input:** Changed `type="text"` to `type="email"` for native browser validation and mobile email keyboard
+- **Password validation:** Added client-side `password.length < 6` check before calling the login API, giving instant feedback instead of waiting for backend round-trip
+
+---
+
+## FIX 17: DOM getElementById → React State (DOM-1)
+
+**File:** `frontend/src/app/dashboard/page.js` — walk-in check-in form
+
+### Before
+
+```jsx
+<select id="walkin-patient">...</select>
+<select id="walkin-doctor">...</select>
+<button onClick={() => {
+  const pId = document.getElementById('walkin-patient').value;
+  const dId = document.getElementById('walkin-doctor').value;
+  ...
+}}>
+```
+
+DOM anti-pattern — React shouldn't query the DOM directly for form values.
+
+### After
+
+```jsx
+<select value={walkinPatientId} onChange={(e) => setWalkinPatientId(e.target.value)}>...</select>
+<select value={walkinDoctorId} onChange={(e) => setWalkinDoctorId(e.target.value)}>...</select>
+<button onClick={() => {
+  if (!walkinPatientId || !walkinDoctorId) { alert('Select patient and doctor first'); return; }
+  handleQueueCheckin(walkinPatientId, walkinDoctorId);
+}}>
+```
+
+Controlled React components with state variables. No DOM queries needed.
+
+---
+
+## FIX 18: Debounced Patient Search & Deduplicated Doctors Fetch (PERF-1, STALE-2)
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+### PERF-1: Debounce
+
+Before: `useEffect` fired `fetchPatients()` on every keystroke. After: 300ms debounce via `setTimeout` + cleanup `clearTimeout`.
+
+### STALE-2: Two Sources of Truth
+
+Before: `searchPhysiciansAdmin` directly overwrote `doctorsList` with filtered results, breaking booking dropdowns and doctor matching.
+
+After: Created separate `doctorSearchResults` state for the physician registry search. `doctorsList` stays as the master list. The registry view uses `doctorSearchResults.length > 0 ? doctorSearchResults : doctorsList` so it falls back to showing all doctors when no search is active.
+
+---
+
+## FIX 19: Patient History Records Page (FEAT-1)
+
+**File:** `frontend/src/app/patients/[id]/history-records/page.js` (NEW)
+
+### Problem
+
+Clicking "View Diagnostic Reports Details (Legacy App)" on a patient name navigated to a 404 page — the route didn't exist. Also, the patient detail modal in the dashboard that was supposed to contain this link was missing (state was set but nothing rendered).
+
+### Solution
+
+Created a full patient history page at `/patients/[id]/history-records` that:
+- Fetches patient details + appointment history from `GET /api/patients/:id`
+- Shows patient profile card (name, email, phone, age, gender, registration date)
+- Shows medical history section
+- Shows appointment history with status badges
+- Has "Back to Dashboard" navigation
+
+Also rebuilt the patient detail modal in the dashboard as an overlay that appears when clicking a patient name in the doctor's appointments table, with the link to the history records page.
+
+---
+
+## FIX 20: AbortController Infrastructure (PERF-2)
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+Added `abortRef` (useRef) with lifecycle management. A new AbortController is created each render cycle and aborted on unmount. The signal is passed to fetch calls to prevent state-update-on-unmounted-component warnings.
+
+---
+
+## FIX 21: Frontend Registration Validation (Phase 7)
+
+**File:** `frontend/src/app/dashboard/page.js` — patient registration form
+
+### Changes
+
+- **Phone validation:** Added `regPhone.replace(/[\s-]/g, '')` + `/^\+?\d{7,15}$/` check matching backend
+- **Age validation:** Added `parseInt(regAge, 10)` range check (0-150) matching backend
+
+---
+
+## FIX 22: Code Cleanup (CODE-1, CODE-4)
+
+- Removed unused `CalendarDays` import from landing page (`page.js`)
+- Removed unused `Volume2`, `DollarSign`, `Sparkles` imports from dashboard
+- Removed redundant Google Fonts preconnect `<link>` tags from `layout.js` (handled automatically by `next/font/google`)
+
+---
+
+## FIX 23: Doctor Worklist Regression (REGR-1)
+
+**File:** `backend/src/routes/doctors.js` (backend change, frontend-critical impact)
+
+### Problem
+
+When we added `select` to `GET /api/doctors` (security hardening), we omitted `userId`. The frontend's `fetchDoctorWorklist` uses `doctorsList.find(d => d.userId === user.id)` to match the logged-in user to their doctor record. Without `userId`, the match always failed silently — doctors saw zero appointments and zero queue tokens.
+
+### Fix
+
+Added `userId: true` back to the `select` clause in both `GET /api/doctors` and `GET /api/doctors/:id` endpoints.
+
+### Lesson
+
+Security-hardening `select` changes are breaking API changes. Always grep frontend consumers before restricting response fields.
+
+---
+
+## FIX 24: Doctor Loading States
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+### Problem
+
+When a doctor logs in, the "My Appointments" and "Calling Queue" tabs showed "No appointments scheduled" / "No patients in queue" for 1-3 seconds until `fetchDoctorWorklist()` completed. The empty state flashed before data arrived.
+
+### Solution
+
+Added `doctorLoading` state, set to `true` before the fetch and `false` in `finally`. Both tabs now show a pulse-loader spinner while loading, then show either the data or the empty state.
+
+---
+
+## FIX 25: Queue Action Loading Feedback
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+### Problem
+
+"Begin Call", "Finished", "Skip", and "Complete" buttons had no loading state. Clicking gave no visual feedback — the button appeared unresponsive while the API call was in flight.
+
+### Solution
+
+Added `queueActionLoading` state. All four buttons show "...ing" text during their API call (Calling..., Finishing..., Skipping..., Completing...) and are disabled to prevent double-clicks.
+
+---
+
+## FIX 26: Navbar Hydration Fix
+
+**File:** `frontend/src/components/common/Navbar.js`
+
+### Problem
+
+Same SSR/CSR mismatch as the dashboard. `if (!user) return null` rendered null on the server but the full `<nav>` on the client (user available immediately via lazy `useState` initializer from localStorage). This caused hydration errors on every page using Navbar.
+
+### Solution
+
+Added the `mounted` pattern: `const [mounted] = useState(false)` + `useEffect(() => setMounted(true), [])`. Both server and client render null on first pass; the nav renders after hydration via useEffect.
+
+---
+
+## FIX 27: AbortController Lifecycle Fix
+
+**File:** `frontend/src/app/dashboard/page.js`
+
+### Problem
+
+The AbortController `useEffect` was missing `[]` — it ran on every render, creating a new controller and aborting the previous one. Any in-flight fetch got cancelled with `console AbortError`.
+
+### Solution
+
+Added `[]` dependency array so the controller is created once on mount and only aborted on unmount. Also added `if (e?.name === 'AbortError') return;` guards to catch blocks.

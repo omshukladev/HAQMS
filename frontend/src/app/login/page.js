@@ -33,9 +33,11 @@ export default function Login() {
       return;
     }
 
-    // Notice we do NOT check password length here (even though registration requires it),
-    // causing inconsistent user experiences and letting brute force slide.
-    
+    if (password.length < 6) {
+      setValidationError('Password must be at least 6 characters.');
+      return;
+    }
+
     const result = await login(email, password);
     if (!result.success) {
       setValidationError(result.error || 'Invalid credentials');
@@ -80,7 +82,7 @@ export default function Login() {
                 <input
                   id="email"
                   name="email"
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-14 pr-5 py-5 border border-[#cbd5e1] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"

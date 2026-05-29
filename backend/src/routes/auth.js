@@ -1,14 +1,27 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 const { PrismaClient } = require("@prisma/client");
 
 const router = express.Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// POST /api/auth/register
-router.post("/register", async (req, res) => {
+// Rate limiting: max 10 login/register attempts per IP per 15 minutes
+// Skipped in test environment to allow test suites
+const authLimiter = process.env.NODE_ENV === "test"
+  ? (req, res, next) => next()
+  : rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 10,
+      message: { error: "Too many attempts. Try again later." },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
+
+// Apply rate limiter to login and register only
+router.post("/register", authLimiter, async (req, res) => {
   try {
     const { email, password, name, role } = req.body;
 
@@ -78,7 +91,7 @@ router.post("/register", async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     // Bug fix: removed password from the the console
     console.log(`[AUTH] Login attempt for email: ${req.body.email}`);

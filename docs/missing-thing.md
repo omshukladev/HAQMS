@@ -1026,4 +1026,84 @@ Remove the unused icon imports from the import statement.
 Low because it has minimal impact on bundle size but improves code clarity.
 
 ### Status
-Pending
+Fixed
+
+---
+
+### Title
+Rate limiting on auth endpoints (fixed)
+
+### Severity
+Medium
+
+### Category
+Backend / Security
+
+### Location
+backend/src/routes/auth.js
+
+### Problem
+No rate limiting on login/register — brute force attacks possible.
+
+### Status
+Fixed
+
+---
+
+### Title
+Missing security headers (fixed)
+
+### Severity
+Medium
+
+### Category
+Backend / Security
+
+### Location
+backend/src/index.js
+
+### Problem
+No helmet middleware — app missing XSS, clickjacking, and other browser-level protections.
+
+### Status
+Fixed
+
+---
+
+### Title
+Doctor worklist broken by missing userId in select (fixed)
+
+### Severity
+Critical
+
+### Category
+Backend / Frontend
+
+### Location
+backend/src/routes/doctors.js
+
+### Problem
+Security-hardening `select` clause omitted `userId`, breaking frontend doctor-to-user matching.
+
+### Status
+Fixed
+
+---
+
+### Title
+Missing patient history records page (fixed)
+
+### Severity
+Critical
+
+### Category
+Frontend
+
+### Location
+frontend/src/app/patients/[id]/history-records/page.js (NEW)
+
+### Problem
+Clicking "View Diagnostic Reports Details" navigated to 404 — no route existed.
+
+### Status
+Fixed

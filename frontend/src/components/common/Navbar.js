@@ -1,13 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { Activity, LogOut, LayoutDashboard, MonitorPlay } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
-  if (!user) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!user || !mounted) return null;
 
   return (
     <nav className="sticky top-0 z-50 bg-[#ffffff] border-b border-[#f1f5f9] shadow-sm">

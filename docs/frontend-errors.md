@@ -39,14 +39,14 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/dashboard/page.js:99-103`
 - **Problem:** `useEffect` fires `fetchPatients()` on every keystroke with no debounce. Typing "Alice" triggers 5 separate API calls.
 - **Fix:** Add 300ms debounce using `setTimeout` + `clearTimeout` or a debounce hook
-- **Status:** Pending
+- **Status:** Fixed
 
 ### PERF-2: Missing AbortController on All Fetches
 - **Severity:** High
 - **File:** `frontend/src/app/dashboard/page.js` (all fetch calls)
 - **Problem:** No `AbortController` on any of ~15 fetch calls. If component unmounts mid-request, React throws state-update-on-unmounted warnings.
 - **Fix:** Pass `signal: abortController.signal` to each fetch, abort in useEffect cleanup
-- **Status:** Pending
+- **Status:** Fixed
 
 ### DOM-1: DOM Anti-Pattern in React
 - **Severity:** High
@@ -66,15 +66,15 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **Severity:** Low
 - **File:** `frontend/src/app/queue/page.js:48`
 - **Problem:** `refreshCount` captured in stale closure — console log always shows initial value + 1.
-- **Fix:** Remove the log or use `useRef` for the current count
-- **Status:** Pending
+- **Fix:** Moved log inside functional state updater to access latest count
+- **Status:** Fixed
 
 ### STALE-2: Duplicate Doctors Fetch
 - **Severity:** Medium
 - **File:** `frontend/src/app/dashboard/page.js:106-120`
 - **Problem:** `fetchDoctorsDropdown` and `searchPhysiciansAdmin` both populate `doctorsList`. Two sources of truth cause race conditions.
-- **Fix:** Single source of truth for doctors list
-- **Status:** Pending
+- **Fix:** Created separate `doctorSearchResults` state for search results; `doctorsList` stays as master list
+- **Status:** Fixed
 
 ---
 
@@ -82,10 +82,10 @@ All discovered frontend issues organized by the internship evaluation challenges
 
 ### FEAT-1: Missing Patient History Records Page
 - **Severity:** Critical (required feature)
-- **File:** Does not exist — `frontend/src/app/patients/[id]/history-records/page.js`
-- **Problem:** Clicking "View Diagnostic Reports Details (Legacy App)" on a patient navigates to 404. Must build this page.
-- **Fix:** Create the page to fetch and render patient's appointments, diagnoses, and medical history
-- **Status:** Pending
+- **File:** `frontend/src/app/patients/[id]/history-records/page.js`
+- **Problem:** Clicking "View Diagnostic Reports Details (Legacy App)" on a patient navigated to 404.
+- **Fix:** Created the page to fetch and render patient's profile, appointments, and medical history. Also rebuilt the patient detail modal in the dashboard that was missing.
+- **Status:** Fixed
 
 ### FEAT-2: Missing Patient Detail Page
 - **Severity:** Medium
@@ -153,21 +153,21 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/dashboard/page.js:638-643` (register), `722-727` (book)
 - **Problem:** Submit buttons have no `disabled` state while request is in flight. Double-click creates duplicate records.
 - **Fix:** Add `isSubmitting` state, disable button while true
-- **Status:** Pending
+- **Status:** Fixed
 
 ### UX-2: No Password Validation on Login
 - **Severity:** Low
 - **File:** `frontend/src/app/login/page.js:26-38`
 - **Problem:** Password field has no client-side presence/length check. Backend rejects it with delayed error.
 - **Fix:** Add `password.length < 6` check with instant error message
-- **Status:** Pending
+- **Status:** Fixed
 
 ### UX-3: Email Input Uses `type="text"`
 - **Severity:** Low
 - **File:** `frontend/src/app/login/page.js:81`
 - **Problem:** Email input uses `type="text"` instead of `type="email"`, disabling native validation and mobile email keyboard.
-- **Fix:** Change to `type="email"` or keep `type="text"` with proper custom validation
-- **Status:** Pending
+- **Fix:** Change to `type="email"`
+- **Status:** Fixed
 
 ### UX-4: No Error Boundary
 - **Severity:** High
@@ -185,7 +185,14 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/page.js:4`
 - **Problem:** `CalendarDays` imported from lucide-react but never used.
 - **Fix:** Remove from import
-- **Status:** Pending
+- **Status:** Fixed
+
+### CODE-1b: Unused Imports in Dashboard
+- **Severity:** Low
+- **File:** `frontend/src/app/dashboard/page.js:7-11`
+- **Problem:** `Volume2`, `DollarSign`, `Sparkles` imported from lucide-react but never used in JSX.
+- **Fix:** Removed unused icons from import statement
+- **Status:** Fixed
 
 ### CODE-2: `'use client'` on Static Page
 - **Severity:** Low
@@ -206,7 +213,7 @@ All discovered frontend issues organized by the internship evaluation challenges
 - **File:** `frontend/src/app/layout.js:19-21`
 - **Problem:** Google Fonts preconnect links are redundant when using `next/font/google` (Inter).
 - **Fix:** Remove preconnect links
-- **Status:** Pending
+- **Status:** Fixed
 
 ### CODE-5: No Frontend Tests
 - **Severity:** Medium
@@ -235,25 +242,17 @@ All discovered frontend issues organized by the internship evaluation challenges
 | Category | Total | Fixed | Pending |
 |----------|-------|-------|---------|
 | **Critical (crash / leak)** | 5 | 5 | 0 |
-| **High** | 8 | 2 | 6 |
-| **Medium** | 7 | 2 | 5 |
-| **Low** | 8 | 0 | 8 |
-| **Total** | **28** | **9** | **19** |
+| **High** | 8 | 7 | 1 |
+| **Medium** | 7 | 5 | 2 |
+| **Low** | 8 | 4 | 4 |
+| **Total** | **28** | **21** | **7** |
 
-## Priority Fix Order
+## Remaining Items
 
-1. FEAT-1: Build patient history-records page
-2. SEC-1: JWT in localStorage
-3. UX-4: Error boundary
-4. PERF-1: Debounce patient search
-5. DOM-1: Replace DOM anti-pattern with React state
-6. UX-1: Loading states on submit buttons
-7. PERF-2: AbortController on fetches
-8. SEC-2: Hide hardcoded credentials
-9. SEC-3: Client-side role guard on delete
-10. STALE-2: Deduplicate doctors fetch
-11. UX-2: Password validation on login
-12. UX-3: Email input type
-13. FEAT-2: Patient detail page
-14. STALE-1: Stale closure refreshCount
-15. CODE-1-5: Cleanup items
+1. SEC-1: JWT in localStorage — migrate to httpOnly cookies (requires backend change)
+2. UX-4: Error boundary — add React error boundary to layout
+3. SEC-2: Hide hardcoded demo credentials behind toggle
+4. SEC-3: Client-side role guard on delete button
+5. FEAT-2: Patient detail page (separate route)
+6. CODE-5: No frontend tests
+7. CODE-2: Remove `'use client'` from static landing page

@@ -1768,6 +1768,57 @@ console.log(`[SLOW REPORT] Querying stats sequentially for doctor: ${doc.name}`)
 
 ---
 
+## Rate Limiting on Auth Endpoints
+
+### Problem
+
+Auth endpoints (`POST /api/auth/login`, `POST /api/auth/register`) had no rate limiting. An attacker could brute-force credentials with unlimited requests — no lockout, no throttling.
+
+### Solution
+
+Installed `express-rate-limit` and applied a 10-request-per-15-minute window to both login and register:
+
+```js
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Too many attempts. Try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post("/login", authLimiter, async (req, res) => { ... });
+router.post("/register", authLimiter, async (req, res) => { ... });
+```
+
+Skipped in test environment via `process.env.NODE_ENV === "test"` check so test suites aren't blocked.
+
+### Tradeoffs
+
+- Legitimate users are limited to 10 login attempts per 15 minutes — sufficient for normal use
+- No user-specific lockout (IP-based only), so a shared IP could be blocked by one user's failures
+
+---
+
+## Helmet Security Headers
+
+### Problem
+
+Express app had no security headers — vulnerable to XSS, content-type sniffing, clickjacking, and other browser-level attacks.
+
+### Solution
+
+Added `helmet()` middleware to the Express app:
+
+```js
+const helmet = require("helmet");
+app.use(helmet());
+```
+
+This sets ~15 HTTP security headers including X-Content-Type-Options, X-Frame-Options, Strict-Transport-Security, and Content-Security-Policy defaults.
+
+---
+
 ## Backend Regression: Doctor Worklist Broken by Security Select Fix
 
 ### Problem

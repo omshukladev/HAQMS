@@ -7,6 +7,61 @@ Update this file after major development sessions.
 
 ---
 
+## 2026-05-29 — Final Polish: Loading States, AbortError Fix, Navbar Hydration, Queue Action Feedback
+
+### Completed
+
+- **Doctor loading states** — Added `doctorLoading` state to both "My Appointments" and "Calling Queue" tabs. Previously, the empty state ("No appointments") flashed for 1-3 seconds until data loaded. Now a loading spinner shows while `fetchDoctorWorklist()` is in-flight.
+- **Queue action loading feedback** — Added `queueActionLoading` state to "Begin Call", "Finished", "Skip", and "Complete" buttons. Each shows "...ing" text (Calling..., Finishing..., Skipping..., Completing...) and disables all buttons during API calls.
+- **AbortError fix** — The `useEffect` for `abortRef` was missing `[]`, so it ran on every render, creating a new AbortController each time and aborting the previous one. Any in-flight fetch got cancelled with `AbortError`. Fixed by adding `[]` dependency array. Also added `if (e?.name === 'AbortError') return;` guards to catch blocks.
+- **Navbar hydration fix** — Same `mounted` pattern from the dashboard applied to Navbar component. The `if (!user) return null` guard caused SSR/CSR mismatch on every page using Navbar (dashboard, queue).
+
+### Files Changed
+
+- `frontend/src/app/dashboard/page.js` — doctorLoading, queueActionLoading states, AbortError guards, abortRef deps
+- `frontend/src/components/common/Navbar.js` — Added mounted pattern for hydration fix
+
+---
+
+## 2026-05-29 — Mass Fix: Rate Limiting, Helmet, Loading States, Validation, DOM Refactor, Search Dedup, History Page
+
+### Completed
+
+- **Rate limiting on auth endpoints** — Installed `express-rate-limit`, applied 10 req/15min limit to POST /api/auth/login and POST /api/auth/register. Skipped in test env.
+- **Helmet security headers** — Installed `helmet`, applied to Express app for secure HTTP headers (XSS filter, content-type sniffing, etc.).
+- **STALE-1: Fixed stale closure on refreshCount** — Moved console.log inside functional state updater `setRefreshCount((prev) => { ... })` so the log always shows the current count.
+- **UX-1: Loading/disabled states on all submit buttons** — Added `regSubmitting`, `bookingSubmitting`, `checkinSubmitting` states. Register, Book Appointment, and Check In buttons now show "Registering...", "Booking...", "Checking In..." text and are disabled during requests. Prevents double-submit race conditions.
+- **CODE-1/CODE-4: Cleanup** — Removed unused CalendarDays icon import from landing page, removed redundant Google Fonts preconnect links from layout.js, removed unused Volume2/DollarSign/Sparkles icon imports from dashboard.
+- **UX-2/UX-3: Login validation fixes** — Changed email input `type="text"` to `type="email"`. Added client-side password length check (min 6 chars).
+- **Frontend validation parity** — Added phone format validation (7-15 digits + optional +) and age range validation (0-150) to patient registration form, matching backend checks.
+- **STALE-2: Deduplicated doctors fetch** — Created separate `doctorSearchResults` state for the physician registry search so it no longer overwrites `doctorsList`. The master list stays intact for booking dropdowns and doctor matching.
+- **PERF-1: Debounced patient search** — Wrapped the search-triggered `fetchPatients` in 300ms debounce via setTimeout/clearTimeout instead of firing on every keystroke.
+- **DOM-1: Replaced getElementById with React state** — Converted `walkin-patient` and `walkin-doctor` select elements from `document.getElementById().value` to controlled React components with `walkinPatientId`/`walkinDoctorId` state and `onChange` handlers.
+- **FEAT-1: Built missing patient history records page** — Created `frontend/src/app/patients/[id]/history-records/page.js` with full patient profile, medical history, and appointment history display. Added patient detail modal back to dashboard with "View Diagnostic Reports Details (Legacy App)" link that was only setting state but had no rendering.
+- **Added AbortController infrastructure** — Added `abortRef` and lifecycle management to dashboard, applied signal to `fetchPatients`.
+
+### Files Changed
+
+- `backend/src/index.js` — Added helmet()
+- `backend/src/routes/auth.js` — Added express-rate-limit
+- `backend/package.json` — Added express-rate-limit, helmet deps
+- `frontend/src/app/patients/[id]/history-records/page.js` — NEW file (history records route)
+- `frontend/src/app/dashboard/page.js` — Loading states, abort controller, DOM refactor, search dedup, debounce, patient modal, validation
+- `frontend/src/app/queue/page.js` — Fixed stale closure
+- `frontend/src/app/login/page.js` — type="email", password validation
+- `frontend/src/app/page.js` — Removed unused CalendarDays import
+- `frontend/src/app/layout.js` — Removed redundant preconnect links
+
+### Status
+
+- ✅ All Phase 1 security fixes done (rate limiting + helmet)
+- ✅ All Phase 2 frontend crashes fixed (stale closure)
+- ✅ Phase 6 frontend stability: history page created, DOM refs fixed, loading states done, search debounced
+- ✅ Phase 7 validation parity done
+- ⏳ Remaining: AbortController on remaining fetches (partially done), UX-4 error boundary, CODE-5 tests
+
+---
+
 ## 2026-05-29 — Backend Regression: Doctor Worklist Broken by Security Select Fix
 
 ### Completed

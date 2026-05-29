@@ -47,9 +47,11 @@ export default function QueueMonitor() {
     // dozens of parallel intervals will poll the database, causing memory bloat,
     // state update crashes on unmounted components, and heavy server load.
     const intervalId = setInterval(() => {
-      console.log(`[POLL] Active Queue Poll #${refreshCount + 1} firing...`);
       fetchQueueData();
-      setRefreshCount((prev) => prev + 1);
+      setRefreshCount((prev) => {
+        console.log(`[POLL] Active Queue Poll #${prev + 1} firing...`);
+        return prev + 1;
+      });
     }, 3000);
 
     // BUG FIX: Return cleanup function to clear interval on unmount, preventing memory leak
