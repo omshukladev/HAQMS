@@ -43,56 +43,58 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen justify-center items-center py-12 px-6 lg:px-8">
+    <div className="flex flex-col min-h-screen justify-center items-center py-12 px-6 lg:px-8 bg-[#f8fafc]">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-teal-600 dark:text-teal-400 font-extrabold text-3xl">
-          <Activity className="h-8 w-8 animate-pulse" />
-          HAQMS
+        <Link href="/" className="inline-flex items-center gap-3 text-[#0d9488] font-black text-4xl tracking-tighter">
+          <div className="w-12 h-12 rounded-2xl bg-[#0d9488] flex items-center justify-center shadow-xl shadow-[#0d9488]/20">
+            <Activity className="h-7 w-7 text-white" />
+          </div>
+          <span>HAQMS</span>
         </Link>
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-800 dark:text-gray-100">
-          Sign in to your account
+        <h2 className="mt-10 text-4xl font-black text-[#0f172a] tracking-tighter">
+          Portal Login
         </h2>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Or use one of the pre-seeded credentials in the README
+        <p className="mt-3 text-sm font-bold text-[#64748b]">
+          Clinical access for registered staff members
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="glass py-8 px-6 shadow-xl rounded-2xl border border-gray-200 dark:border-gray-800">
+      <div className="mt-12 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-[#ffffff] py-12 px-10 shadow-2xl rounded-5xl border border-[#e2e8f0] ring-1 ring-[#0f172a]/5">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Validation Display */}
             {(validationError || authError) && (
-              <div className="p-3 text-sm bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-lg">
+              <div className="p-5 text-sm font-black bg-[#fff1f2] border border-[#ffe4e6] text-[#e11d48] rounded-3xl animate-in fade-in slide-in-from-top-2 duration-300">
                 {validationError || authError}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <label htmlFor="email" className="block text-[#64748b] uppercase tracking-widest text-[10px] mb-2 px-1 font-black">
                 Email Address
               </label>
-              <div className="mt-1 relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#94a3b8] group-focus-within:text-[#0d9488] transition-colors">
                   <User className="h-5 w-5" />
                 </div>
                 <input
                   id="email"
                   name="email"
-                  type="text" // Inconsistent: using text instead of email type to disable native validations
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
+                  className="block w-full pl-14 pr-5 py-5 border border-[#cbd5e1] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   placeholder="admin@haqms.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Password
+              <label htmlFor="password" className="block text-[#64748b] uppercase tracking-widest text-[10px] mb-2 px-1 font-black">
+                Account Password
               </label>
-              <div className="mt-1 relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#94a3b8] group-focus-within:text-[#0d9488] transition-colors">
                   <Lock className="h-5 w-5" />
                 </div>
                 <input
@@ -101,54 +103,55 @@ export default function Login() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
+                  className="block w-full pl-14 pr-14 py-5 border border-[#cbd5e1] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-6 flex items-center text-[#94a3b8] hover:text-[#0d9488] transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="glow-btn w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300 disabled:opacity-50"
-              >
-                {loading ? 'Signing in...' : 'Sign In'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-5 px-6 bg-[#0d9488] hover:bg-[#0f766e] text-white font-black rounded-2xl shadow-xl shadow-[#0d9488]/20 transition-all active:scale-95 disabled:opacity-50 mt-6 text-lg"
+            >
+              {loading ? 'Verifying...' : 'Sign In To Portal'}
+            </button>
           </form>
 
-          {/* Quick seeded login panel */}
-          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Seeded Demo Credentials</h4>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          {/* Seeded Credentials */}
+          <div className="mt-12 pt-10 border-t border-[#f1f5f9]">
+            <h4 className="text-[10px] font-black text-[#94a3b8] uppercase tracking-[0.2em] mb-8 text-center">Development Access</h4>
+            <div className="grid grid-cols-1 gap-4">
               <button
                 type="button"
                 onClick={() => { setEmail('admin@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
+                className="group text-left p-5 rounded-3xl bg-[#f8fafc] border border-[#e2e8f0] hover:border-[#0d9488] hover:bg-[#f0fdfa] transition-all"
               >
-                <strong>Admin:</strong> admin@haqms.com
+                <div className="text-sm font-black text-[#0f172a] group-hover:text-[#0d9488]">Admin Root</div>
+                <div className="text-[11px] text-[#64748b] font-bold mt-1 uppercase tracking-wider">admin@haqms.com</div>
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('reception1@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
+                className="group text-left p-5 rounded-3xl bg-[#f8fafc] border border-[#e2e8f0] hover:border-[#0d9488] hover:bg-[#f0fdfa] transition-all"
               >
-                <strong>Receptionist:</strong> reception1@haqms.com
+                <div className="text-sm font-black text-[#0f172a] group-hover:text-[#0d9488]">Receptionist Desk</div>
+                <div className="text-[11px] text-[#64748b] font-bold mt-1 uppercase tracking-wider">reception1@haqms.com</div>
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('doctor1@haqms.com'); setPassword('password123'); }}
-                className="text-left p-2 rounded bg-gray-100 dark:bg-gray-800 hover:bg-teal-500/10 hover:text-teal-600 dark:hover:text-teal-400 transition-colors text-gray-600 dark:text-gray-300"
+                className="group text-left p-5 rounded-3xl bg-[#f8fafc] border border-[#e2e8f0] hover:border-[#0d9488] hover:bg-[#f0fdfa] transition-all"
               >
-                <strong>Doctor:</strong> doctor1@haqms.com
+                <div className="text-sm font-black text-[#0f172a] group-hover:text-[#0d9488]">Physician Worklist</div>
+                <div className="text-[11px] text-[#64748b] font-bold mt-1 uppercase tracking-wider">doctor1@haqms.com</div>
               </button>
             </div>
           </div>

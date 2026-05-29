@@ -42,6 +42,10 @@
 - [x] Define consistent API response envelope and apply to all endpoints
 - [x] Update frontend to handle standardized responses
 
+## Phase 5.5 — Backend Regression Fixes
+
+- [x] Fix doctor worklist broken by missing userId in /api/doctors select clause
+
 ## Phase 6 — Frontend Stability
 
 - [x] Replace hardcoded API URL with env var in AuthContext

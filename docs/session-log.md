@@ -7,6 +7,29 @@ Update this file after major development sessions.
 
 ---
 
+## 2026-05-29 — Backend Regression: Doctor Worklist Broken by Security Select Fix
+
+### Completed
+
+- **Discovered doctor worklist regression** — Doctors logged in but saw zero appointments/queue tokens even when patients were queued. Traced root cause to `GET /api/doctors` endpoint in `backend/src/routes/doctors.js`.
+- **Root cause identified** — When we added `select` to the doctor endpoints (as a security hardening to "return only safe fields"), we omitted `userId`. The frontend's `fetchDoctorWorklist` uses `doctorsList.find(d => d.userId === user.id)` to match the logged-in user to their doctor record. With `userId` missing from the API response, `d.userId` was always `undefined`, the match failed silently, and the doctor saw empty data.
+- **Fixed both GET /api/doctors and GET /api/doctors/:id** — Added `userId: true` back to the `select` clause in both endpoints. The field is necessary for the doctor-to-user matching — omitting it broke the entire doctor workflow.
+
+### Files Changed
+
+- `backend/src/routes/doctors.js` — Added `userId: true` to select in both list and detail endpoints
+
+### Key Lesson
+
+Security-hardening changes that restrict API response fields MUST trace all downstream consumers before landing. A `select` that omits a field needed by the frontend is a breaking change, not a safe cleanup. Always grep the frontend for consumers of each field before removing it from a `select`.
+
+### Status
+
+- ✅ Doctor worklist fixed — appointments and queue tokens now visible
+- This was a self-inflicted regression, not an intentional assignment bug
+
+---
+
 ## 2026-05-29 — Frontend UI Contrast & Accessibility Fix
 
 ### Completed

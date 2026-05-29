@@ -43,6 +43,7 @@ router.get("/", authenticate, async (req, res) => {
         // BUG FIXED: Use select to return only safe fields, not entire object
         select: {
           id: true,
+          userId: true,
           name: true,
           specialization: true,
           department: true,
@@ -125,6 +126,7 @@ router.get("/:id", authenticate, async (req, res) => {
       where: { id: req.params.id },
       select: {
         id: true,
+        userId: true,
         name: true,
         specialization: true,
         department: true,

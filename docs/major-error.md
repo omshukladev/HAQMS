@@ -4,6 +4,49 @@ Tracks blocking issues, debugging incidents, and their resolutions.
 
 ---
 
+## 2026-05-29 — Security Select Fix Broke Doctor Worklist (Backend Regression)
+
+### Full Error
+
+No visible error thrown. Doctor logs in, navigates to Appointments tab, sees "No appointments scheduled for you today" even though patients have been queued by receptionist/admin.
+
+### Reproduction Steps
+
+1. Log in as admin or receptionist
+2. Queue a patient or create an appointment for any doctor (e.g., Dr. Gregory House)
+3. Verify token shows in the public queue monitor (`/queue`)
+4. Log out, log in as the doctor (e.g., `doctor1@haqms.com`)
+5. Navigate to Appointments tab → empty (no appointments, no queue tokens)
+
+### Investigation
+
+- Traced the frontend data flow:
+  - `fetchDoctorWorklist()` (line 244) calls `doctorsList.find(d => d.userId === user.id)` to match the logged-in user to their doctor record
+  - If `matchedDoc` is not found, the function returns early via `if (!matchedDoc) return;`
+  - Console confirmed `doctorsList` contained doctor objects but all `userId` fields were `undefined`
+- Traced the backend: `GET /api/doctors` endpoint in `backend/src/routes/doctors.js`
+  - The `select` clause (added as a security hardening) listed explicit fields but **omitted `userId`**
+  - Before our security fix, the endpoint returned all fields including `userId`
+  - After our fix, `userId` was silently dropped from the response
+
+### Root Cause
+
+When we added `select` to the `/api/doctors` endpoint to "return only safe fields" (part of Phase 1 security fixes), we failed to trace downstream consumers. The frontend's doctor-to-user matching relied on `userId` being present in the API response.
+
+### Resolution
+
+Added `userId: true` back to both `select` clauses in:
+- `GET /api/doctors` (list endpoint)
+- `GET /api/doctors/:id` (detail endpoint)
+
+### Lessons Learned
+
+1. **Security-hardening `select` changes are breaking changes.** Always grep the frontend for every field consumed before removing it.
+2. **Silent failures are dangerous.** `if (!matchedDoc) return;` swallows the error — no console error, no UI feedback. A missing field becomes an invisible feature break.
+3. **Trace all consumers before restricting API responses.** This was a self-inflicted regression, not an intentional assignment bug.
+
+---
+
 ## 2026-05-28 — CI Local Test Runner: Port 5432 Conflict
 
 ### Full Error

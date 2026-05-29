@@ -1765,3 +1765,45 @@ console.log(`[SLOW REPORT] Querying stats sequentially for doctor: ${doc.name}`)
 - appointments.test.js: 12 tests ✅
 - patients.test.js: 15 tests ✅
 - reports.test.js: 3 tests ✅
+
+---
+
+## Backend Regression: Doctor Worklist Broken by Security Select Fix
+
+### Problem
+
+Doctor logs in but sees zero appointments and zero queue tokens — even when patients have been queued for them. Public queue monitor shows tokens correctly, but doctor dashboard is empty.
+
+### Why It Happened
+
+When adding `select` to `GET /api/doctors` as a security hardening (to "return only safe fields"), we accidentally omitted `userId` from the select. The frontend's `fetchDoctorWorklist` function matches the logged-in user to their doctor record using:
+
+```js
+const matchedDoc = doctorsList.find(d => d.userId === user.id);
+if (!matchedDoc) return; // silently exits — no error, no data
+```
+
+Without `userId` in the API response, `d.userId` was always `undefined`, the match always failed, and the function returned before fetching any data.
+
+### Solution
+
+Added `userId: true` back to the `select` clause in both `GET /api/doctors` (list) and `GET /api/doctors/:id` (detail):
+
+```js
+select: {
+  id: true,
+  userId: true,  // ← added back — required for doctor-to-user matching
+  name: true,
+  specialization: true,
+  // ...
+},
+```
+
+### Why This Fix
+
+The `userId` field is necessary data, not sensitive internal state. It's the foreign key linking a Doctor record to a User account. The frontend legitimately needs it for authorization matching. Removing it from the API response broke the entire doctor workflow silently.
+
+### Tradeoffs
+
+- Slight increase in API response size (one string field per doctor)
+- No security risk — `userId` is a UUID, not PII or credential data

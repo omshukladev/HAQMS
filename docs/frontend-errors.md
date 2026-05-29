@@ -217,15 +217,28 @@ All discovered frontend issues organized by the internship evaluation challenges
 
 ---
 
+## Backend Regression (Self-Inflicted)
+
+### REGR-1: Doctor Worklist Broken by Missing `userId` in Doctors API Select
+- **Severity:** Critical
+- **File:** `backend/src/routes/doctors.js:44-55`
+- **Problem:** When adding a `select` clause to `GET /api/doctors` (security hardening to "return only safe fields"), the `userId` field was accidentally omitted. The frontend's `fetchDoctorWorklist` uses `doctorsList.find(d => d.userId === user.id)` to match the logged-in user to their doctor record. Without `userId`, matching always fails silently, and the doctor sees zero appointments/queue tokens.
+- **Root Cause:** Security-hardening change did not trace downstream consumers. A `select` that restricts fields is a breaking API change.
+- **Fix:** Added `userId: true` back to `select` in both `GET /api/doctors` and `GET /api/doctors/:id`
+- **Status:** Fixed
+- **Discovered:** 2026-05-29
+
+---
+
 ## Summary Count
 
 | Category | Total | Fixed | Pending |
 |----------|-------|-------|---------|
-| **Critical (crash / leak)** | 4 | 4 | 0 |
+| **Critical (crash / leak)** | 5 | 5 | 0 |
 | **High** | 8 | 2 | 6 |
 | **Medium** | 7 | 2 | 5 |
 | **Low** | 8 | 0 | 8 |
-| **Total** | **27** | **8** | **19** |
+| **Total** | **28** | **9** | **19** |
 
 ## Priority Fix Order
 

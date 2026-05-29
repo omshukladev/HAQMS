@@ -10,49 +10,49 @@ export default function Navbar() {
   if (!user) return null;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200 px-6 py-3 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-[#ffffff] border-b border-[#f1f5f9] shadow-sm">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Branding */}
-        <Link href="/" className="flex items-center gap-2.5 text-teal-600 font-bold text-xl tracking-tight">
-          <div className="w-8 h-8 rounded-lg bg-teal-600 flex items-center justify-center">
-            <Activity className="h-4 w-4 text-white" />
+        <Link href="/" className="flex items-center gap-3 text-[#0d9488] font-black text-2xl tracking-tighter">
+          <div className="w-10 h-10 rounded-xl bg-[#0d9488] flex items-center justify-center shadow-lg shadow-[#0d9488]/20">
+            <Activity className="h-6 w-6 text-white" />
           </div>
           <span>HAQMS</span>
         </Link>
 
         {/* Links */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-black text-[#64748b] hover:text-[#0f172a] hover:bg-[#f8fafc] transition-all"
           >
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
           </Link>
           <Link
             href="/queue"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-black text-[#64748b] hover:text-[#0f172a] hover:bg-[#f8fafc] transition-all"
           >
             <MonitorPlay className="h-4 w-4" />
-            Live Queue
+            Live Monitor
           </Link>
         </div>
 
         {/* User Info & Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-6">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-sm font-semibold text-gray-800">{user.name}</span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xxs font-bold tracking-wide uppercase bg-teal-50 text-teal-700 border border-teal-200">
+            <span className="text-sm font-black text-[#0f172a]">{user.name}</span>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black tracking-[0.2em] uppercase bg-[#f0fdfa] text-[#0d9488] border border-[#ccfbf1]">
               {user.role}
             </span>
           </div>
 
           <button
             onClick={logout}
-            className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+            className="p-3 rounded-xl text-[#94a3b8] hover:text-[#e11d48] hover:bg-[#fff1f2] transition-all border border-transparent hover:border-[#ffe4e6]"
             title="Log Out"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-5 w-5" />
           </button>
         </div>
       </div>

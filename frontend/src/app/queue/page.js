@@ -78,105 +78,98 @@ export default function QueueMonitor() {
   }, {});
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc]">
       <Navbar />
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8">
         {/* Header Dashboard Banner */}
-        <div className="glass p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-teal-500/10 text-teal-600 dark:text-teal-400 rounded-xl">
-              <Monitor className="h-6 w-6" />
+        <div className="bg-[#ffffff] p-8 rounded-5xl shadow-sm border border-[#e2e8f0] mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="flex items-center gap-5">
+            <div className="p-5 bg-[#0d9488] text-white rounded-2xl shadow-lg shadow-[#0d9488]/20">
+              <Monitor className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                Live Public Monitor Board
+              <h1 className="text-4xl font-black text-[#0f172a] tracking-tighter">
+                Public Monitor
               </h1>
-              <p className="text-xs text-gray-400 dark:text-gray-400 font-semibold mt-1">
-                Real-time physician calling boards. Auto-syncs every 3 seconds.
+              <p className="text-sm text-[#64748b] font-black uppercase tracking-widest mt-1">
+                Real-time physician calling boards • Auto-syncing
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-bold uppercase tracking-wide border border-teal-500/20">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              Auto Refreshing
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#f0fdf4] text-[#166534] text-[11px] font-black uppercase tracking-[0.2em] border border-[#dcfce7]">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              Live Sync
             </span>
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-400 text-xs font-mono">
-              Polls: {refreshCount}
+            <div className="px-5 py-2.5 bg-[#f1f5f9] rounded-full text-[#475569] text-[11px] font-black uppercase tracking-[0.2em]">
+              Cycles: {refreshCount}
             </div>
           </div>
         </div>
 
         {/* Error State */}
         {error && (
-          <div className="p-4 mb-6 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center gap-3 text-sm">
-            <AlertCircle className="h-5 w-5 shrink-0" />
+          <div className="p-6 mb-10 rounded-2xl bg-[#fff1f2] border border-[#ffe4e6] text-[#e11d48] flex items-center gap-5 text-sm font-black animate-in fade-in slide-in-from-top-4 duration-300 shadow-sm">
+            <AlertCircle className="h-7 w-7 shrink-0" />
             <div>
-              <strong>Sync Error:</strong> {error} - Please verify that the backend API server is online.
+              <strong>Sync Interrupted:</strong> {error} - Verify API connectivity.
             </div>
           </div>
         )}
 
         {/* Loading Spinner */}
         {loading && tokens.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="pulse-loader">
-              <div></div>
-              <div></div>
-            </div>
-            <p className="mt-4 text-sm font-semibold text-gray-400">Loading active token queues...</p>
+          <div className="flex flex-col items-center justify-center py-40">
+            <div className="pulse-loader mb-8"><div></div></div>
+            <p className="text-[11px] font-black text-[#94a3b8] uppercase tracking-[0.3em] animate-pulse">Initializing Board...</p>
           </div>
         ) : Object.keys(groupedTokens).length === 0 ? (
-          <div className="glass p-12 text-center rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-            <Bell className="h-12 w-12 text-gray-400 mx-auto animate-bounce" />
-            <h3 className="mt-4 text-lg font-bold text-gray-800 dark:text-gray-100">No Active Tokens</h3>
-            <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
-              There are currently no patient check-ins registered for today. Use the receptionist portal in the Staff Dashboard to check-in patients.
+          <div className="bg-[#ffffff] p-24 text-center rounded-5xl border-2 border-dashed border-[#e2e8f0]">
+            <Bell className="h-20 w-20 text-[#e2e8f0] mx-auto mb-8 animate-bounce" />
+            <h3 className="text-3xl font-black text-[#0f172a] tracking-tighter">No Active Tokens</h3>
+            <p className="mt-4 text-[#64748b] font-medium max-w-md mx-auto text-lg">
+              The clinic is currently not calling any patients.
             </p>
           </div>
         ) : (
           /* Grid of Doctor Calling Boards */
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-3">
             {Object.entries(groupedTokens).map(([docId, docInfo]) => (
               <div
                 key={docId}
-                className="glass rounded-2xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col h-full hover:shadow-teal-500/5 hover:border-teal-500/30 transition-all duration-300"
+                className="bg-[#ffffff] rounded-5xl shadow-xl shadow-[#0f172a]/5 border border-[#e2e8f0] overflow-hidden flex flex-col h-full hover:border-[#0d9488]/30 transition-all duration-300"
               >
                 {/* Doctor Title Header */}
-                <div className="bg-gray-500/5 p-5 border-b border-gray-200 dark:border-gray-800">
-                  <h3 className="font-extrabold text-lg text-gray-800 dark:text-gray-100">{docInfo.doctorName}</h3>
-                  <p className="text-xs text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider mt-0.5">
+                <div className="bg-[#f8fafc] p-8 border-b border-[#f1f5f9]">
+                  <h3 className="font-black text-2xl text-[#0f172a] tracking-tighter">{docInfo.doctorName}</h3>
+                  <p className="text-[11px] text-[#0d9488] font-black uppercase tracking-[0.2em] mt-2">
                     {docInfo.specialization}
                   </p>
                 </div>
 
                 {/* Token Display Grid */}
-                <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="p-10 flex-1 flex flex-col justify-between bg-[#ffffff]">
                   {/* Current Active Token Box */}
-                  <div className="mb-6">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2.5">
+                  <div className="mb-12">
+                    <h4 className="text-[10px] font-black text-[#94a3b8] uppercase tracking-[0.3em] mb-6 px-1">
                       Now Calling
                     </h4>
                     {docInfo.calling ? (
-                      <div className="bg-teal-500/10 dark:bg-teal-500/5 border border-teal-500/30 p-6 rounded-2xl text-center shadow-inner relative overflow-hidden group">
-                        {/* Glowing radial accent */}
-                        <div className="absolute inset-0 bg-radial-gradient(circle, rgba(20,184,166,0.1) 0%, transparent 80%) opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span className="block text-5xl font-black text-teal-600 dark:text-teal-400 tracking-wider animate-pulse">
+                      <div className="bg-[#0d9488] p-12 rounded-[2.5rem] text-center shadow-2xl shadow-[#0d9488]/40 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <span className="block text-8xl font-black text-white tracking-tighter">
                           #{docInfo.calling.tokenNumber}
                         </span>
-                        <span className="block text-xs font-bold text-gray-400 uppercase tracking-wide mt-2">
-                          Patient: {docInfo.calling.patient.name}
+                        <span className="block text-[11px] font-black text-[#ccfbf1] uppercase tracking-[0.3em] mt-6">
+                          {docInfo.calling.patient.name}
                         </span>
                       </div>
                     ) : (
-                      <div className="bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800/80 p-6 rounded-2xl text-center shadow-inner">
-                        <span className="block text-2xl font-extrabold text-gray-400 dark:text-gray-500 tracking-wider italic">
-                          Idle
-                        </span>
-                        <span className="block text-xs font-medium text-gray-400 mt-2">
-                          No active patients being called
+                      <div className="bg-[#f8fafc] border border-[#f1f5f9] p-12 rounded-[2.5rem] text-center">
+                        <span className="block text-5xl font-black text-[#e2e8f0] tracking-tighter italic">
+                          IDLE
                         </span>
                       </div>
                     )}
@@ -184,24 +177,23 @@ export default function QueueMonitor() {
 
                   {/* Upcoming Tokens list */}
                   <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
-                      Queue List
+                    <h4 className="text-[10px] font-black text-[#94a3b8] uppercase tracking-[0.3em] mb-6 px-1">
+                      Waiting List
                     </h4>
                     {docInfo.waiting.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-4">
                         {docInfo.waiting.map((token) => (
                           <div
                             key={token.id}
-                            className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300"
-                            title={`Patient: ${token.patient.name}`}
+                            className="px-6 py-3 rounded-2xl bg-[#f1f5f9] border border-[#e2e8f0] text-lg font-black text-[#475569] shadow-sm"
                           >
                             #{token.tokenNumber}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400 dark:text-gray-500 italic block">
-                        No upcoming patients in queue
+                      <span className="text-sm text-[#cbd5e1] font-bold italic px-1 block">
+                        No pending tokens
                       </span>
                     )}
                   </div>

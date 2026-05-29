@@ -18,7 +18,10 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState(user?.role === 'ADMIN' ? 'reports' : user?.role === 'RECEPTIONIST' ? 'patients' : 'appointments');
 
   useEffect(() => {
-    setMounted(true);
+    const frame = requestAnimationFrame(() => {
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // ==========================================
@@ -360,19 +363,19 @@ export default function Dashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-1.5 mb-6 overflow-x-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-1.5 mb-8 overflow-x-auto">
           <div className="flex">
             {user.role === 'ADMIN' && (
               <>
                 <button
                   onClick={() => setActiveTab('reports')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'reports' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'reports' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   System Audit Reports
                 </button>
                 <button
                   onClick={() => setActiveTab('physicians')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'physicians' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'physicians' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   Physician Registry
                 </button>
@@ -383,13 +386,13 @@ export default function Dashboard() {
               <>
                 <button
                   onClick={() => setActiveTab('patients')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'patients' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'patients' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   Patient Registry
                 </button>
                 <button
                   onClick={() => setActiveTab('book')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'book' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'book' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   Scheduling / Check-in
                 </button>
@@ -400,13 +403,13 @@ export default function Dashboard() {
               <>
                 <button
                   onClick={() => setActiveTab('appointments')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'appointments' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'appointments' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   My Appointments
                 </button>
                 <button
                   onClick={() => setActiveTab('queue')}
-                  className={`px-4 py-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'queue' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${activeTab === 'queue' ? 'border-teal-600 text-teal-700' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
                 >
                   Calling Queue
                 </button>
@@ -431,31 +434,31 @@ export default function Dashboard() {
             <div className="grid gap-8 lg:grid-cols-3">
               {/* Directory Section */}
               <div className="lg:col-span-2 space-y-6">
-                <div className="glass p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-800">
-                  <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-                    <ClipboardList className="h-5 w-5 text-teal-600" />
-                    Patient Lookup Directory
+                <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+                  <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3 mb-8">
+                    <ClipboardList className="h-7 w-7 text-[#0d9488]" />
+                    Patient Directory
                   </h3>
 
-                  {/* Filters (Causes slow re-renders on keystroke) */}
-                  <div className="flex gap-4 mb-6">
-                    <div className="relative flex-1 rounded-lg shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                        <Search className="h-4 w-4" />
+                  {/* Filters */}
+                  <div className="flex gap-4 mb-10">
+                    <div className="relative flex-1 group">
+                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#94a3b8]">
+                        <Search className="h-5 w-5" />
                       </div>
                       <input
                         type="text"
                         value={patientSearch}
                         onChange={(e) => setPatientSearch(e.target.value)}
                         placeholder="Search by name, phone or email..."
-                        className="block w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                        className="block w-full pl-14 pr-4 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all text-sm outline-none"
                       />
                     </div>
 
                     <select
                       value={patientGender}
                       onChange={(e) => setPatientGender(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      className="px-8 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] text-sm font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:bg-[#ffffff] transition-all outline-none cursor-pointer"
                     >
                       <option value="All">All Genders</option>
                       <option value="Male">Male</option>
@@ -466,47 +469,50 @@ export default function Dashboard() {
 
                   {/* Table listing */}
                   {patientsLoading ? (
-                    <p className="text-center py-6 text-gray-400 animate-pulse text-sm">Synchronizing table data...</p>
+                    <div className="text-center py-20">
+                       <div className="pulse-loader mx-auto mb-6"><div></div></div>
+                       <p className="text-sm font-black text-[#94a3b8] uppercase tracking-widest animate-pulse">Fetching Patient Records...</p>
+                    </div>
                   ) : patients.length === 0 ? (
-                    <p className="text-center py-6 text-gray-400 text-sm">No registered patients match this filter.</p>
+                    <div className="text-center py-20 bg-[#f8fafc] rounded-3xl border-2 border-dashed border-[#e2e8f0]">
+                      <p className="text-[#94a3b8] font-bold">No registered patients match this filter.</p>
+                    </div>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm text-left">
+                      <table className="min-w-full text-sm text-left">
                         <thead>
-                          <tr className="text-gray-400 uppercase tracking-widest text-xxs font-bold border-b border-gray-200 dark:border-gray-800">
-                            <th className="pb-3">Name</th>
-                            <th className="pb-3">Contact</th>
-                            <th className="pb-3">Age/Sex</th>
-                            <th className="pb-3 text-right">Actions</th>
+                          <tr className="text-[#64748b] uppercase tracking-widest text-[10px] font-black border-b-2 border-[#f1f5f9]">
+                            <th className="pb-5 px-4 bg-[#f8fafc] rounded-tl-xl">Patient Name</th>
+                            <th className="pb-5 px-4 bg-[#f8fafc]">Contact Info</th>
+                            <th className="pb-5 px-4 bg-[#f8fafc]">Demographics</th>
+                            <th className="pb-5 px-4 bg-[#f8fafc] text-right rounded-tr-xl">Management</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tbody className="divide-y divide-[#f1f5f9]">
                           {patients.map((p) => (
-                            <tr key={p.id} className="hover:bg-gray-500/5 transition-colors">
-                              <td className="py-3.5 font-bold text-gray-800 dark:text-gray-200">
-                                {p.name}
-                                {p.email && <span className="block text-xxs text-gray-400 font-normal mt-0.5">{p.email}</span>}
+                            <tr key={p.id} className="group hover:bg-[#f0fdfa] transition-all">
+                              <td className="py-5 px-4">
+                                <span className="font-black text-[#0f172a] text-base block">{p.name}</span>
+                                {p.email && <span className="text-xs text-[#64748b] font-medium">{p.email}</span>}
                               </td>
-                              <td className="py-3.5 text-gray-700 dark:text-gray-300 font-medium">{p.phoneNumber}</td>
-                              <td className="py-3.5 text-gray-700 dark:text-gray-300">
-                                {p.age} yrs / <span className="capitalize">{p.gender}</span>
+                              <td className="py-5 px-4 text-[#475569] font-black tabular-nums">{p.phoneNumber}</td>
+                              <td className="py-5 px-4 text-[#475569] font-bold">
+                                {p.age} Years <span className="text-[#cbd5e1] mx-1">/</span> <span className="capitalize text-[#0d9488]">{p.gender}</span>
                               </td>
-                              <td className="py-3.5 text-right space-x-2">
+                              <td className="py-5 px-4 text-right space-x-2">
                                 <button
                                   disabled={doctorsList.length === 0}
                                   onClick={() => handleQueueCheckin(p.id, doctorsList[0]?.id)}
-                                  className="text-xxs px-2.5 py-1 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold hover:bg-teal-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="px-5 py-2.5 rounded-xl bg-[#0d9488] text-white text-xs font-black hover:bg-[#0f766e] transition-all shadow-md shadow-[#0d9488]/20 disabled:opacity-50"
                                 >
                                   Check In
                                 </button>
-                                
-                                {/* Security flaw testing: Receptionist or doctor can delete since check is bypassed */}
                                 <button
                                   onClick={() => handleDeletePatient(p.id)}
-                                  className="text-xxs p-1 rounded bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors"
+                                  className="p-2.5 rounded-xl bg-[#fff1f2] text-[#e11d48] hover:bg-[#e11d48] hover:text-white transition-all border border-[#ffe4e6]"
                                   title="Delete patient record"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-5 w-5" />
                                 </button>
                               </td>
                             </tr>
@@ -517,22 +523,22 @@ export default function Dashboard() {
                   )}
 
                   {/* Pagination control */}
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <span className="text-xs text-gray-400 font-medium">
-                      Page {patientsPagination.page} of {patientsPagination.totalPages}
+                  <div className="flex items-center justify-between mt-10 pt-8 border-t border-[#f1f5f9]">
+                    <span className="text-xs text-[#64748b] font-black uppercase tracking-widest">
+                      Displaying Page {patientsPagination.page} of {patientsPagination.totalPages}
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
                         disabled={patientsPagination.page <= 1}
                         onClick={() => fetchPatients(patientsPagination.page - 1)}
-                        className="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 hover:bg-teal-500/10 disabled:opacity-50 text-xs font-semibold"
+                        className="px-6 py-3 rounded-2xl border border-[#e2e8f0] bg-white hover:bg-[#f8fafc] disabled:opacity-30 text-xs font-black transition-all active:scale-95"
                       >
-                        Prev
+                        Previous
                       </button>
                       <button
                         disabled={patientsPagination.page >= patientsPagination.totalPages}
                         onClick={() => fetchPatients(patientsPagination.page + 1)}
-                        className="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 hover:bg-teal-500/10 disabled:opacity-50 text-xs font-semibold"
+                        className="px-6 py-3 rounded-2xl border border-[#e2e8f0] bg-white hover:bg-[#f8fafc] disabled:opacity-30 text-xs font-black transition-all active:scale-95"
                       >
                         Next
                       </button>
@@ -542,49 +548,49 @@ export default function Dashboard() {
               </div>
 
               {/* Registration Form */}
-              <div className="glass p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 h-fit">
-                <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-                  <UserPlus className="h-5 w-5 text-teal-600" />
-                  New Registration
+              <div className="bg-[#ffffff] p-8 rounded-4xl shadow-sm border border-slate-200 h-fit">
+                <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 mb-8">
+                  <UserPlus className="h-6 w-6 text-teal-600" />
+                  New Entry
                 </h3>
 
                 {regMessage && (
-                  <div className={`p-3 text-sm rounded-lg mb-4 ${regMessage.startsWith('Success') ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/20' : 'bg-rose-500/15 text-rose-500 border border-rose-500/20'}`}>
+                  <div className={`p-5 text-sm font-black rounded-2xl mb-8 border ${regMessage.startsWith('Success') ? 'bg-[#f0fdf4] text-[#166534] border-[#dcfce7]' : 'bg-[#fff1f2] text-[#9f1239] border-[#ffe4e6]'}`}>
                     {regMessage}
                   </div>
                 )}
 
-                <form onSubmit={handleRegisterPatient} className="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <form onSubmit={handleRegisterPatient} className="space-y-6 text-sm font-bold text-[#475569]">
                   <div>
-                    <label className="block mb-1">Patient Full Name*</label>
+                    <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Patient Full Name*</label>
                     <input
                       type="text"
                       required
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder="Bruce Wayne"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      placeholder="e.g. Bruce Wayne"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block mb-1">Age (Years)*</label>
+                      <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Age (Years)*</label>
                       <input
                         type="number"
                         required
                         value={regAge}
                         onChange={(e) => setRegAge(e.target.value)}
                         placeholder="35"
-                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                        className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block mb-1">Gender*</label>
+                      <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Gender*</label>
                       <select
                         value={regGender}
                         onChange={(e) => setRegGender(e.target.value)}
-                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                        className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                       >
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
@@ -594,42 +600,42 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label className="block mb-1">Contact Phone*</label>
+                    <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Contact Phone*</label>
                     <input
                       type="text"
                       required
                       value={regPhone}
                       onChange={(e) => setRegPhone(e.target.value)}
-                      placeholder="555-0199 (Unchecked format)"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      placeholder="555-0199"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1">Email Address</label>
+                    <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Email Address</label>
                     <input
                       type="email"
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
                       placeholder="bruce@wayne.com"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1">Medical Anamnesis / History (Can be left blank)</label>
+                    <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Clinical History</label>
                     <textarea
                       value={regHistory}
                       onChange={(e) => setRegHistory(e.target.value)}
-                      placeholder="E.g. cardiovascular risks, asthma..."
+                      placeholder="Any pre-existing conditions..."
                       rows="3"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none resize-none"
                     ></textarea>
                   </div>
 
                   <button
                     type="submit"
-                    className="glow-btn w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-sm rounded-lg shadow-md transition-colors duration-300 mt-2"
+                    className="w-full py-5 bg-[#0d9488] hover:bg-[#0f766e] text-white font-black rounded-2xl shadow-xl shadow-[#0d9488]/20 transition-all active:scale-95 mt-4"
                   >
                     Register Patient Record
                   </button>
@@ -645,42 +651,41 @@ export default function Dashboard() {
         {activeTab === 'book' && (
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Book Appointment Card */}
-            <div className="glass p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-800">
-              <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-                <CalendarDays className="h-5 w-5 text-teal-600" />
-                Schedule Appointment Slot
+            <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+              <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3 mb-8">
+                <CalendarDays className="h-7 w-7 text-[#0d9488]" />
+                Schedule Slot
               </h3>
 
               {bookingMessage && (
-                <div className={`p-3 text-sm rounded-lg mb-4 ${bookingMessage.startsWith('Success') ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/20' : 'bg-rose-500/15 text-rose-500 border border-rose-500/20'}`}>
+                <div className={`p-5 text-sm font-black rounded-2xl mb-8 border ${bookingMessage.startsWith('Success') ? 'bg-[#f0fdf4] text-[#166534] border-[#dcfce7]' : 'bg-[#fff1f2] text-[#9f1239] border-[#ffe4e6]'}`}>
                   {bookingMessage}
                 </div>
               )}
 
-              <form onSubmit={handleBookAppointment} className="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+              <form onSubmit={handleBookAppointment} className="space-y-6 text-sm font-bold text-[#475569]">
                 <div>
-                  <label className="block mb-1">Select Registered Patient*</label>
+                  <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Select Patient*</label>
                   <select
                     required
                     value={bookingPatientId}
                     onChange={(e) => setBookingPatientId(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                    className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   >
                     <option value="">-- Choose Patient --</option>
                     {patients.map(p => (
                       <option key={p.id} value={p.id}>{p.name} ({p.phoneNumber})</option>
                     ))}
                   </select>
-                  <span className="text-xxs text-gray-400 block mt-1">If client is missing, register them in the Directory tab first.</span>
                 </div>
 
                 <div>
-                  <label className="block mb-1">Select Physician*</label>
+                  <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Assign Physician*</label>
                   <select
                     required
                     value={bookingDoctorId}
                     onChange={(e) => setBookingDoctorId(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                    className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   >
                     <option value="">-- Choose Physician --</option>
                     {doctorsList.map(d => (
@@ -690,30 +695,30 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="block mb-1">Appointment Date & Time*</label>
+                  <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Date & Time*</label>
                   <input
                     type="datetime-local"
                     required
                     value={bookingDate}
                     onChange={(e) => setBookingDate(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                    className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-1">Consultation Objective / Reason</label>
+                  <label className="block mb-2 text-[#64748b] uppercase tracking-widest text-[10px] px-1 font-black">Reason for Visit</label>
                   <input
                     type="text"
                     value={bookingReason}
                     onChange={(e) => setBookingReason(e.target.value)}
-                    placeholder="Regular diagnostic review, suture removal..."
-                    className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                    placeholder="e.g. Regular diagnostic review"
+                    className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="glow-btn w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-sm rounded-lg shadow-md transition-colors duration-300 mt-2"
+                  className="w-full py-5 bg-[#0d9488] hover:bg-[#0f766e] text-white font-black rounded-2xl shadow-xl shadow-[#0d9488]/20 transition-all active:scale-95 mt-4"
                 >
                   Book Appointment Slot
                 </button>
@@ -721,27 +726,23 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Walkin Checkin Token Board */}
-            <div className="glass p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-800">
-              <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-                <Activity className="h-5 w-5 text-teal-600" />
-                Active Direct Queue Check-In
+            <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+              <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3 mb-8">
+                <Activity className="h-7 w-7 text-[#0d9488]" />
+                Live Check-In
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 font-semibold">
-                Generate an immediate waiting token for a direct walk-in patient. Allocates active positions under selected practitioners.
-              </p>
-
-              <div className="space-y-6">
-                <div className="p-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-gray-700 dark:text-gray-300 text-xs leading-5">
-                  <strong>Token Generation Engine Note:</strong> Direct arrivals bypass appointments. The token engine automatically fetches the current days maximum token size and increments.
-                  <span className="block mt-1 font-bold text-emerald-600 uppercase tracking-wide">✓ Race condition fixed — token generation is now atomic (Prisma transaction with unique constraint)</span>
+              
+              <div className="space-y-8">
+                <div className="p-6 rounded-2xl border border-[#dcfce7] bg-[#f0fdf4] text-[#166534] text-sm leading-relaxed font-bold">
+                  <strong>Atomic Token Generation:</strong> Generates a sequential waiting number for the selected practitioner.
                 </div>
 
-                <div className="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <div className="space-y-6 text-sm font-black text-[#64748b]">
                   <div>
-                    <label className="block mb-1">Select Walk-in Patient*</label>
+                    <label className="block mb-2 uppercase tracking-widest text-[10px] px-1">Select Patient*</label>
                     <select
                       id="walkin-patient"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:bg-[#ffffff] transition-all outline-none"
                     >
                       <option value="">-- Choose Patient --</option>
                       {patients.map(p => (
@@ -751,10 +752,10 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label className="block mb-1">Assign Physician*</label>
+                    <label className="block mb-2 uppercase tracking-widest text-[10px] px-1">Assign Doctor*</label>
                     <select
                       id="walkin-doctor"
-                      className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 text-sm focus:outline-none"
+                      className="block w-full px-5 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-black focus:ring-4 focus:ring-[#0d9488]/10 focus:bg-[#ffffff] transition-all outline-none"
                     >
                       <option value="">-- Choose Physician --</option>
                       {doctorsList.map(d => (
@@ -773,7 +774,7 @@ export default function Dashboard() {
                       }
                       handleQueueCheckin(pId, dId);
                     }}
-                    className="glow-btn w-full py-2.5 bg-gray-900 hover:bg-gray-800 text-white dark:bg-teal-500 dark:text-gray-950 dark:hover:bg-teal-400 font-extrabold text-sm rounded-lg shadow-md transition-colors duration-300 mt-2"
+                    className="w-full py-5 bg-[#0f172a] hover:bg-[#000000] text-white font-black rounded-2xl shadow-xl transition-all active:scale-95 mt-4"
                   >
                     Generate Live Token
                   </button>
@@ -787,49 +788,51 @@ export default function Dashboard() {
             TAB: DOCTOR WORKLIST - APPOINTMENTS (DOCTOR ROLE)
             ============================================================== */}
         {activeTab === 'appointments' && (
-          <div className="space-y-6">
-            <div className="glass p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md">
-              <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-                <CalendarDays className="h-5 w-5 text-teal-600" />
-                Scheduled Daily Bookings List
+          <div className="space-y-8">
+            <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+              <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3 mb-8">
+                <CalendarDays className="h-7 w-7 text-[#0d9488]" />
+                Today Schedule
               </h3>
 
               {doctorAppointments.length === 0 ? (
-                <p className="text-center py-6 text-gray-400 text-sm">No appointments scheduled for you today.</p>
+                <div className="text-center py-20 bg-[#f8fafc] rounded-3xl border-2 border-dashed border-[#e2e8f0]">
+                  <p className="text-[#94a3b8] font-bold">No appointments scheduled for you today.</p>
+                </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm text-left">
+                  <table className="min-w-full text-sm text-left">
                     <thead>
-                      <tr className="text-gray-400 uppercase tracking-widest text-xxs font-bold border-b border-gray-200 dark:border-gray-800">
-                        <th className="pb-3">Time</th>
-                        <th className="pb-3">Patient</th>
-                        <th className="pb-3">Consultation Reason</th>
-                        <th className="pb-3">Status</th>
-                        <th className="pb-3 text-right">Actions</th>
+                      <tr className="text-[#64748b] uppercase tracking-widest text-[10px] font-black border-b-2 border-[#f1f5f9]">
+                        <th className="pb-5 px-4 bg-[#f8fafc] rounded-tl-xl">Time</th>
+                        <th className="pb-5 px-4 bg-[#f8fafc]">Patient Info</th>
+                        <th className="pb-5 px-4 bg-[#f8fafc]">Reason</th>
+                        <th className="pb-5 px-4 bg-[#f8fafc]">Status</th>
+                        <th className="pb-5 px-4 bg-[#f8fafc] text-right rounded-tr-xl">Management</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                    <tbody className="divide-y divide-[#f1f5f9]">
                       {doctorAppointments.map((app) => (
-                        <tr key={app.id} className="hover:bg-gray-500/5 transition-colors">
-                          <td className="py-3.5 font-mono font-bold text-gray-800 dark:text-gray-200">
+                        <tr key={app.id} className="group hover:bg-[#f0fdfa] transition-all">
+                          <td className="py-5 px-4 font-black text-[#0d9488] text-base tabular-nums">
                             {new Date(app.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </td>
-                          <td className="py-3.5">
+                          <td className="py-5 px-4">
                             <button
                               onClick={() => setSelectedPatientHistory(app.patient)}
-                              className="font-bold text-teal-600 hover:underline hover:text-teal-700 transition-colors"
+                              className="font-black text-[#0f172a] text-base hover:text-[#0d9488] transition-colors"
                             >
                               {app.patient ? app.patient.name : 'Unknown Patient'}
                             </button>
-                            <span className="block text-xxs text-gray-400 mt-0.5">Age: {app.patient?.age}</span>
+                            <span className="block text-xs text-[#64748b] font-medium">Age: {app.patient?.age}</span>
                           </td>
-                          <td className="py-3.5 text-gray-700 dark:text-gray-300 font-semibold">{app.reason || 'None provided'}</td>
-                          <td className="py-3.5">
-                            <span className={`inline-flex px-2 py-0.5 rounded text-xxs font-extrabold tracking-wide uppercase ${app.status === 'COMPLETED' ? 'bg-teal-500/10 text-teal-600' : app.status === 'CANCELLED' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                          <td className="py-5 px-4 text-[#475569] font-bold">{app.reason || 'Not specified'}</td>
+                          <td className="py-5 px-4">
+                            <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${app.status === 'COMPLETED' ? 'bg-[#f0fdf4] text-[#166534] border-[#dcfce7]' : app.status === 'CANCELLED' ? 'bg-[#fff1f2] text-[#9f1239] border-[#ffe4e6]' : 'bg-[#fffbeb] text-[#92400e] border-[#fef3c7]'}`}>
                               {app.status}
                             </span>
                           </td>
-                          <td className="py-3.5 text-right space-x-2">
+                          <td className="py-5 px-4 text-right space-x-2">
                             {app.status === 'PENDING' && (
                               <>
                                 <button
@@ -837,13 +840,13 @@ export default function Dashboard() {
                                     const matchedDoc = doctorsList.find(d => d.userId === user.id);
                                     handleQueueCheckin(app.patientId, matchedDoc.id, app.id);
                                   }}
-                                  className="text-xxs px-2.5 py-1 rounded bg-teal-500/10 text-teal-600 dark:text-teal-400 font-extrabold hover:bg-teal-500 hover:text-white transition-colors"
+                                  className="px-4 py-2 rounded-xl bg-[#0d9488] text-white text-xs font-black hover:bg-[#0f766e] transition-all"
                                 >
-                                  Check In Patient
+                                  Check In
                                 </button>
                                 <button
                                   onClick={() => handleCompleteAppointment(app.id)}
-                                  className="text-xxs px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold hover:bg-teal-500 hover:text-white transition-colors"
+                                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] text-[#475569] text-xs font-black hover:bg-[#e2e8f0] transition-all"
                                 >
                                   Complete
                                 </button>
@@ -857,48 +860,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-
-            {/* Patient Clinical History Modal Display */}
-            {selectedPatientHistory && (
-              <div className="glass p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100">
-                      Medical Records: {selectedPatientHistory.name}
-                    </h3>
-                    <p className="text-xxs font-bold text-gray-400 uppercase tracking-widest mt-1">
-                      Gender: {selectedPatientHistory.gender} | Contact: {selectedPatientHistory.phoneNumber}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedPatientHistory(null)}
-                    className="text-xs font-bold text-gray-400 hover:text-gray-600"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-xs space-y-2">
-                  <h4 className="font-bold text-gray-400 uppercase tracking-wider">Clinical Background Information</h4>
-                  
-                  {/* BUG FIX: Use optional chaining to handle null medicalHistory */}
-                  <p className="text-gray-700 dark:text-gray-300 leading-5 text-sm font-semibold">
-                    {selectedPatientHistory.medicalHistory?.toUpperCase() || 'No history recorded'}
-                  </p>
-                </div>
-
-                <div className="pt-2 flex justify-between items-center text-xs">
-                  {/* Incomplete Missing Route trigger -> will route to 404 page! */}
-                  <Link 
-                    href={`/patients/${selectedPatientHistory.id}/history-records`} 
-                    className="text-teal-600 font-extrabold hover:underline flex items-center gap-1"
-                  >
-                    View Diagnostic Reports Details (Legacy App)
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -906,58 +867,60 @@ export default function Dashboard() {
             TAB: DOCTOR ACTIVE CALLING QUEUE (DOCTOR ROLE)
             ============================================================== */}
         {activeTab === 'queue' && (
-          <div className="glass p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md">
-            <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-4">
-              <Clock className="h-5 w-5 text-teal-600" />
-              Active Operations Queue Controller
+          <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+            <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3 mb-4">
+              <Clock className="h-7 w-7 text-[#0d9488]" />
+              Live Operations Queue
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 font-semibold">
-              Manage patient call sequences for live monitors. Update status from waiting to active calling.
+            <p className="text-sm text-[#64748b] font-bold mb-10">
+              Manage the real-time patient sequence for the public monitors.
             </p>
 
             {doctorQueue.length === 0 ? (
-              <p className="text-center py-6 text-gray-400 text-sm">No checked-in patients in queue today.</p>
+              <div className="text-center py-20 bg-[#f8fafc] rounded-3xl border-2 border-dashed border-[#e2e8f0]">
+                <p className="text-[#94a3b8] font-bold">No patients currently in your queue.</p>
+              </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {doctorQueue.map((t) => (
                   <div
                     key={t.id}
-                    className={`p-5 rounded-2xl border shadow-md relative overflow-hidden flex flex-col justify-between ${t.status === 'CALLING' ? 'border-teal-500 bg-teal-500/10' : 'border-gray-200 dark:border-gray-800 bg-gray-500/5'}`}
+                    className={`p-8 rounded-4xl border transition-all flex flex-col justify-between ${t.status === 'CALLING' ? 'border-[#0d9488] bg-[#f0fdfa] ring-4 ring-[#0d9488]/5 shadow-xl' : 'border-[#e2e8f0] bg-[#ffffff] shadow-md'}`}
                   >
                     <div className="flex justify-between items-start">
-                      <span className="text-2xl font-black text-gray-800 dark:text-gray-100">Token #{t.tokenNumber}</span>
-                      <span className={`px-2 py-0.5 rounded text-xxs font-extrabold tracking-wide uppercase ${t.status === 'CALLING' ? 'bg-teal-500 text-white' : t.status === 'COMPLETED' ? 'bg-teal-500/10 text-teal-600' : 'bg-amber-500/10 text-amber-500'}`}>
+                      <span className="text-5xl font-black text-[#0f172a] tracking-tighter">#{t.tokenNumber}</span>
+                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase ${t.status === 'CALLING' ? 'bg-[#0d9488] text-white' : t.status === 'COMPLETED' ? 'bg-[#f0fdf4] text-[#166534]' : 'bg-[#fffbeb] text-[#92400e]'}`}>
                         {t.status}
                       </span>
                     </div>
 
-                    <div className="mt-4">
-                      <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200">{t.patient.name}</h4>
-                      <p className="text-xxs text-gray-400 mt-0.5">Contact: {t.patient.phoneNumber}</p>
+                    <div className="mt-8">
+                      <h4 className="text-xl font-black text-[#0f172a]">{t.patient.name}</h4>
+                      <p className="text-xs text-[#64748b] mt-1 font-bold">Mobile: {t.patient.phoneNumber}</p>
                     </div>
 
-                    <div className="mt-6 flex gap-2">
+                    <div className="mt-10 flex gap-3">
                       {t.status === 'WAITING' && (
                         <button
                           onClick={() => handleUpdateQueueStatus(t.id, 'CALLING')}
-                          className="flex-1 py-1.5 bg-teal-600 text-white font-bold text-xxs rounded hover:bg-teal-700 transition-colors"
+                          className="flex-1 py-4 bg-[#0d9488] text-white font-black text-sm rounded-2xl hover:bg-[#0f766e] transition-all shadow-lg shadow-[#0d9488]/20"
                         >
-                          Call Patient
+                          Begin Call
                         </button>
                       )}
                       {t.status === 'CALLING' && (
                         <>
                           <button
                             onClick={() => handleUpdateQueueStatus(t.id, 'COMPLETED')}
-                            className="flex-1 py-1.5 bg-teal-600 text-white font-bold text-xxs rounded hover:bg-teal-700 transition-colors"
+                            className="flex-1 py-4 bg-[#0d9488] text-white font-black text-sm rounded-2xl hover:bg-[#0f766e] transition-all shadow-lg shadow-[#0d9488]/20"
                           >
-                            Consulted
+                            Finished
                           </button>
                           <button
                             onClick={() => handleUpdateQueueStatus(t.id, 'SKIPPED')}
-                            className="flex-1 py-1.5 bg-rose-500/10 text-rose-500 font-bold text-xxs rounded hover:bg-rose-500 hover:text-white transition-colors"
+                            className="flex-1 py-4 bg-[#fff1f2] text-[#e11d48] font-black text-sm rounded-2xl hover:bg-[#ffe4e6] transition-all border border-[#ffe4e6]"
                           >
-                            Skip / No Show
+                            Skip
                           </button>
                         </>
                       )}
@@ -974,58 +937,52 @@ export default function Dashboard() {
             ============================================================== */}
         {activeTab === 'reports' && (
           <div className="space-y-8">
-            <div className="glass p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0]">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
                 <div>
-                  <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-teal-600" />
-                    Doctor Revenue & Operations Report
+                  <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3">
+                    <TrendingUp className="h-7 w-7 text-[#0d9488]" />
+                    Hospital Audit Stats
                   </h3>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold mt-1">
-                    System-wide practitioner performance audits. Computes completed bookings and potential sales.
+                  <p className="text-sm text-[#64748b] font-bold mt-1">
+                    Financial and operational performance metrics across all physicians.
                   </p>
                 </div>
                 <button
                   onClick={generateSystemReport}
                   disabled={adminReportLoading}
-                  className="glow-btn px-4 py-2 bg-teal-600 text-white font-extrabold text-xs rounded-lg shadow hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                  className="w-full sm:w-auto px-8 py-4 bg-[#0d9488] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#0d9488]/20 hover:bg-[#0f766e] disabled:opacity-50 transition-all active:scale-95"
                 >
-                  {adminReportLoading ? 'Aggregating...' : 'Load Doctor System Audit Report'}
+                  {adminReportLoading ? 'Computing Metrics...' : 'Generate System Audit'}
                 </button>
               </div>
 
               {adminReportLoading ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="pulse-loader">
-                    <div></div>
-                    <div></div>
-                  </div>
-                  <p className="mt-4 text-xs font-semibold text-gray-400 animate-pulse">
-                    Executing sequential nested loop aggregates. Event loop is locked...
-                  </p>
+                <div className="flex flex-col items-center justify-center py-32">
+                   <div className="pulse-loader mb-8"><div></div></div>
+                  <p className="text-sm font-black text-[#94a3b8] uppercase tracking-widest animate-pulse">Aggregating Large Data Arrays...</p>
                 </div>
               ) : !adminReportData ? (
-                <div className="p-8 text-center bg-gray-100 dark:bg-gray-800/40 rounded-xl text-gray-400 text-xs font-semibold border border-dashed border-gray-200 dark:border-gray-700">
-                  Click the button above to load reports. Warning: Endpoint is extremely slow on larger doctor count tables!
+                <div className="p-20 text-center bg-[#f8fafc] rounded-3xl text-[#94a3b8] font-black uppercase tracking-widest border-2 border-dashed border-[#e2e8f0]">
+                  Ready to load real-time system performance reports.
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {/* Reporting details benchmark */}
+                <div className="space-y-12">
                   {/* Summary widgets */}
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="p-4 bg-gray-500/5 border border-gray-200 dark:border-gray-800 rounded-xl">
-                      <span className="text-xxs uppercase tracking-wider text-gray-400 font-bold">Total Physicians</span>
-                      <h4 className="text-2xl font-black text-gray-800 dark:text-gray-100 mt-1">{adminReportData.doctors.length}</h4>
+                  <div className="grid gap-8 sm:grid-cols-3">
+                    <div className="p-8 bg-[#ffffff] border border-[#f1f5f9] rounded-4xl shadow-sm">
+                      <span className="text-[10px] uppercase tracking-widest text-[#94a3b8] font-black">Active Doctors</span>
+                      <h4 className="text-5xl font-black text-[#0f172a] mt-3 tracking-tighter">{adminReportData.doctors.length}</h4>
                     </div>
-                    <div className="p-4 bg-gray-500/5 border border-gray-200 dark:border-gray-800 rounded-xl">
-                      <span className="text-xxs uppercase tracking-wider text-gray-400 font-bold">Sum appointments</span>
-                      <h4 className="text-2xl font-black text-gray-800 dark:text-gray-100 mt-1">
+                    <div className="p-8 bg-[#ffffff] border border-[#f1f5f9] rounded-4xl shadow-sm">
+                      <span className="text-[10px] uppercase tracking-widest text-[#94a3b8] font-black">Total Bookings</span>
+                      <h4 className="text-5xl font-black text-[#0f172a] mt-3 tracking-tighter">
                         {adminReportData.doctors.reduce((sum, item) => sum + item.totalAppointments, 0)}
                       </h4>
                     </div>
-                    <div className="p-4 bg-gray-500/5 border border-gray-200 dark:border-gray-800 rounded-xl">
-                      <span className="text-xxs uppercase tracking-wider text-gray-400 font-bold">Total Sales ($)</span>
-                      <h4 className="text-2xl font-black text-teal-600 dark:text-teal-400 mt-1">
+                    <div className="p-8 bg-[#f0fdfa] border border-[#ccfbf1] rounded-4xl shadow-sm">
+                      <span className="text-[10px] uppercase tracking-widest text-[#0d9488] font-black">Gross Revenue</span>
+                      <h4 className="text-5xl font-black text-[#0d9488] mt-3 tracking-tighter">
                         ${adminReportData.doctors.reduce((sum, item) => sum + item.revenue, 0)}
                       </h4>
                     </div>
@@ -1033,29 +990,33 @@ export default function Dashboard() {
 
                   {/* Table representation */}
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm text-left">
+                    <table className="min-w-full text-sm text-left">
                       <thead>
-                        <tr className="text-gray-400 uppercase tracking-widest text-xxs font-bold border-b border-gray-200 dark:border-gray-800">
-                          <th className="pb-3">Doctor</th>
-                          <th className="pb-3">Department</th>
-                          <th className="pb-3 text-center">Consultations</th>
-                          <th className="pb-3 text-center">Today Queue</th>
-                          <th className="pb-3 text-right">Revenue</th>
+                        <tr className="text-[#64748b] uppercase tracking-widest text-[10px] font-black border-b-2 border-[#f1f5f9]">
+                          <th className="pb-5 px-4 bg-[#f8fafc] rounded-tl-xl">Physician</th>
+                          <th className="pb-5 px-4 bg-[#f8fafc]">Department</th>
+                          <th className="pb-5 px-4 bg-[#f8fafc] text-center">Consultations</th>
+                          <th className="pb-5 px-4 bg-[#f8fafc] text-center">Live Queue</th>
+                          <th className="pb-5 px-4 bg-[#f8fafc] text-right rounded-tr-xl">Total Sales</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      <tbody className="divide-y divide-[#f1f5f9]">
                         {adminReportData.doctors.map((item) => (
-                          <tr key={item.id} className="hover:bg-gray-500/5 transition-colors">
-                            <td className="py-3.5 font-bold text-gray-800 dark:text-gray-200">
-                              {item.name}
-                              <span className="block text-xxs text-teal-600 dark:text-teal-400 font-semibold uppercase mt-0.5">{item.specialization}</span>
+                          <tr key={item.id} className="group hover:bg-[#f0fdfa] transition-all">
+                            <td className="py-6 px-4">
+                              <span className="font-black text-[#0f172a] text-base block">{item.name}</span>
+                              <span className="text-xs text-[#0d9488] font-black uppercase tracking-widest">{item.specialization}</span>
                             </td>
-                            <td className="py-3.5 text-gray-700 dark:text-gray-300">{item.department}</td>
-                            <td className="py-3.5 text-center text-gray-700 dark:text-gray-300">
-                              {item.completedAppointments} Completed / {item.totalAppointments} Total
+                            <td className="py-6 px-4 text-[#475569] font-black">{item.department}</td>
+                            <td className="py-6 px-4 text-center text-[#475569] font-bold">
+                              {item.completedAppointments} <span className="text-[#cbd5e1] mx-1">/</span> {item.totalAppointments}
                             </td>
-                            <td className="py-3.5 text-center font-bold text-gray-800 dark:text-gray-200">{item.todayQueueSize} in queue</td>
-                            <td className="py-3.5 text-right font-bold text-teal-600 dark:text-teal-400">${item.revenue}</td>
+                            <td className="py-6 px-4 text-center">
+                               <span className="px-4 py-1.5 rounded-full bg-[#f1f5f9] text-[#475569] text-[10px] font-black uppercase tracking-widest border border-[#e2e8f0]">
+                                 {item.todayQueueSize} active
+                               </span>
+                            </td>
+                            <td className="py-6 px-4 text-right font-black text-[#0d9488] text-xl tabular-nums">${item.revenue}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1071,66 +1032,63 @@ export default function Dashboard() {
             TAB: PHYSICIAN REGISTRY (ADMIN ROLE - SQL INJECTION VULNERABILITY)
             ============================================================== */}
         {activeTab === 'physicians' && (
-          <div className="glass p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-md space-y-6">
+          <div className="bg-[#ffffff] p-8 rounded-4xl shadow-md border border-[#e2e8f0] space-y-10">
             <div>
-              <h3 className="text-lg font-extrabold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                <Award className="h-5 w-5 text-teal-600" />
-                Staff Physicians Registry Lookup
+              <h3 className="text-2xl font-black text-[#0f172a] flex items-center gap-3">
+                <Award className="h-7 w-7 text-[#0d9488]" />
+                Physician Credential Registry
               </h3>
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold mt-1">
-                Database lookup for credentials. Uses a raw SQL interpolation backend query.
+              <p className="text-sm text-[#64748b] font-bold mt-1">
+                Lookup certified hospital staff via database query interface.
               </p>
             </div>
 
             <div className="flex gap-4">
-              <div className="relative flex-1 rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                  <Search className="h-4 w-4" />
+              <div className="relative flex-1 group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-[#94a3b8]">
+                  <Search className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
                   value={adminSearchQuery}
                   onChange={(e) => setAdminSearchQuery(e.target.value)}
-                  placeholder="Enter physician name search criteria (raw syntax supported)..."
-                  className="block w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                  placeholder="Enter physician name..."
+                  className="block w-full pl-14 pr-4 py-4 border border-[#e2e8f0] bg-[#f8fafc] rounded-2xl text-[#0f172a] font-medium focus:ring-4 focus:ring-[#0d9488]/10 focus:border-[#0d9488] focus:bg-[#ffffff] transition-all outline-none"
                 />
               </div>
 
               <button
                 onClick={searchPhysiciansAdmin}
-                className="glow-btn px-5 py-2 bg-gray-900 text-white dark:bg-teal-500 dark:text-gray-950 font-bold text-xs rounded-lg hover:bg-gray-800 dark:hover:bg-teal-400 transition-colors"
+                className="px-10 py-2 bg-[#0f172a] text-white font-black text-sm rounded-2xl hover:bg-[#000000] transition-all active:scale-95 shadow-xl shadow-[#0f172a]/10"
               >
-                Execute SQL Query
+                Search Registry
               </button>
             </div>
 
-            <div className="p-3 bg-emerald-500/10 text-emerald-600 text-xs rounded-lg border border-emerald-500/20 font-semibold leading-5 flex gap-3">
-              <ShieldAlert className="h-5 w-5 shrink-0" />
+            <div className="p-5 bg-[#f0fdf4] text-[#166534] text-xs rounded-2xl border border-[#dcfce7] font-bold leading-6 flex gap-4">
+              <ShieldAlert className="h-6 w-6 shrink-0" />
               <div>
-                <strong>SQL Vulnerability — Fixed:</strong> Raw interpolation replaced with parameterized Prisma queries.
-                <code className="block bg-black/10 dark:bg-black/30 p-1.5 rounded mt-1 font-mono">
-                  {`Before: SELECT * FROM "Doctor" WHERE name ILIKE '%{query}%' → After: prisma.doctor.findMany({ where: { name: { contains: query, mode: "insensitive" } } })`}
-                </code>
+                <strong>Security Implementation:</strong> Raw SQL interpolation has been fully replaced with parameterized Prisma queries to mitigate injection risks.
               </div>
             </div>
 
             {/* Doctors Result List */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {doctorsList.map((doc) => (
                 <div
                   key={doc.id}
-                  className="p-5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-500/5 flex flex-col justify-between"
+                  className="p-8 rounded-4xl border border-[#e2e8f0] bg-[#ffffff] shadow-sm hover:shadow-xl transition-all flex flex-col justify-between group hover:border-[#0d9488]/30"
                 >
                   <div>
-                    <span className="inline-flex px-2 py-0.5 rounded text-xxs font-extrabold tracking-wide uppercase bg-teal-500/10 text-teal-600 dark:text-teal-400 mb-2">
+                    <span className="inline-flex px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase bg-[#f0fdfa] text-[#0d9488] border border-[#ccfbf1] mb-5">
                       {doc.department}
                     </span>
-                    <h4 className="font-extrabold text-gray-800 dark:text-gray-100">{doc.name}</h4>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{doc.specialization}</p>
+                    <h4 className="text-xl font-black text-[#0f172a] group-hover:text-[#0d9488] transition-colors">{doc.name}</h4>
+                    <p className="text-sm text-[#64748b] font-bold mt-1">{doc.specialization}</p>
                   </div>
-                  <div className="mt-6 pt-3 border-t border-gray-200 dark:border-gray-800/80 flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    <span>Exp: {doc.experience} yrs</span>
-                    <span className="font-bold text-teal-600 dark:text-teal-400">Fee: ${doc.consultationFee}</span>
+                  <div className="mt-8 pt-6 border-t border-[#f1f5f9] flex justify-between items-center text-xs font-black text-[#94a3b8]">
+                    <span className="uppercase tracking-widest">{doc.experience} Years Experience</span>
+                    <span className="text-[#0d9488] text-lg tabular-nums">${doc.consultationFee}</span>
                   </div>
                 </div>
               ))}
