@@ -7,6 +7,28 @@ Update this file after major development sessions.
 
 ---
 
+## 2026-05-29 — Frontend UI Contrast & Accessibility Fix
+
+### Completed
+
+- **Fixed critical text contrast issues across dashboard** — Identified and replaced all `text-gray-500` (light gray) with `text-gray-700` (dark gray) and `text-gray-400` with `text-gray-700 dark:text-gray-300` for better readability
+- **Fixed section description text** — All tab descriptions ("System Audit Reports", "Registry Lookup", "Walk-in Check-in", etc.) now use proper contrast
+- **Fixed inactive tab colors** — Changed CSS `.tab-item` color from `#9ca3af` to `#6b7280` (darker gray) so inactive tabs are readable
+- **Fixed doctor specialization text** — Doctor cards in physician lookup now show specialization with better contrast
+- **Fixed all table data text** — Table cells (phone numbers, reasons, departments, etc.) now use `text-gray-700 dark:text-gray-300`
+
+### Files Changed
+
+- `frontend/src/app/dashboard.page.js` — 10 text color improvements
+- `frontend/src/app/globals.css` — Updated `.tab-item` color from `#9ca3af` to `#6b7280`
+
+### Impact
+
+- All text now meets WCAG AA contrast requirements (≥ 4.5:1)
+- Dashboard fully readable without eye strain
+
+---
+
 ## 2026-05-28 — Frontend Quick Wins: LEAK-1, CRASH-1, DOM-2
 
 ### Completed
